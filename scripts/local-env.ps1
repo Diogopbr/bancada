@@ -11,4 +11,5 @@ if (Test-Path $settingsPath) {
     $settings = Get-Content -LiteralPath $settingsPath -Raw | ConvertFrom-Json
     $env:ConnectionStrings__Bancada = $settings.connectionString
     $env:BANCADA_TEST_CONNECTION = $settings.connectionString
+    if ($settings.demoPassword) { $env:BANCADA_DEMO_PASSWORD = $settings.demoPassword }
 }

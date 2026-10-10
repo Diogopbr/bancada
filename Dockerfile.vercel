@@ -1,0 +1,24 @@
+FROM node:24.8.0-bookworm-slim AS frontend
+WORKDIR /src/frontend
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend
+WORKDIR /src
+COPY global.json ./
+COPY backend/Bancada.Api/Bancada.Api.csproj backend/Bancada.Api/
+RUN dotnet restore backend/Bancada.Api
+COPY backend/Bancada.Api/ backend/Bancada.Api/
+RUN dotnet publish backend/Bancada.Api -c Release -o /publish --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
+WORKDIR /app
+COPY --from=backend /publish ./
+COPY --from=frontend /src/frontend/dist/bancada-web/browser/ ./wwwroot/
+ENV ASPNETCORE_HTTP_PORTS=8080
+ENV PORT=8080
+EXPOSE 8080
+USER $APP_UID
+ENTRYPOINT ["dotnet", "Bancada.Api.dll"]

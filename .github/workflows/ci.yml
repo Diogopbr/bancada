@@ -1,0 +1,56 @@
+name: Bancada verification
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: bancada
+          POSTGRES_USER: bancada
+          POSTGRES_PASSWORD: ci-fixture-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bancada -d bancada"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ConnectionStrings__Bancada: Host=localhost;Port=5432;Database=bancada;Username=bancada;Password=ci-fixture-only
+      BANCADA_TEST_CONNECTION: Host=localhost;Port=5432;Database=bancada;Username=bancada;Password=ci-fixture-only
+      BANCADA_DEMO_PASSWORD: Fictional-ci-only!927
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.8.0
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix frontend
+      - run: npx playwright install --with-deps chromium
+      - run: dotnet build backend/Bancada.slnx --configuration Release
+      - run: dotnet test backend/Bancada.Tests --configuration Release --logger trx
+      - run: npm --prefix frontend test -- --watch=false
+      - run: npm --prefix frontend run build
+      - run: npm run test:e2e
+      - run: git diff --check
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: verification-failure
+          path: |
+            playwright-report/
+            test-results/
+            backend/Bancada.Tests/TestResults/

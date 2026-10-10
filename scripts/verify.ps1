@@ -11,6 +11,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Frontend build failed.' }
     npm --prefix frontend test -- --watch=false
     if ($LASTEXITCODE -ne 0) { throw 'Frontend tests failed.' }
+    npm run test:e2e
+    if ($LASTEXITCODE -ne 0) { throw 'End-to-end tests failed.' }
     git diff --check
     if ($LASTEXITCODE -ne 0) { throw 'Diff whitespace check failed.' }
 } finally { Pop-Location }

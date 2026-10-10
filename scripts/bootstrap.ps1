@@ -4,7 +4,7 @@ $repoPath = Split-Path $PSScriptRoot -Parent
 $localPath = Join-Path $repoPath '.local'
 New-Item -ItemType Directory -Force -Path $localPath | Out-Null
 . (Join-Path $PSScriptRoot 'local-env.ps1')
-if (-not (Test-Path (Join-Path $env:DOTNET_ROOT 'dotnet.exe'))) { throw 'Install the .NET 10 SDK before running bootstrap.' }
+if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) { throw 'Install the .NET 10 SDK before running bootstrap.' }
 if (-not (Test-Path (Join-Path $PostgresBin 'initdb.exe'))) { throw 'PostgreSQL 17 binaries are required.' }
 $settingsPath = Join-Path $localPath 'settings.json'
 $dataPath = Join-Path $localPath 'postgres-data'
@@ -13,6 +13,10 @@ if (-not (Test-Path $settingsPath)) {
     @{ connectionString = "Host=127.0.0.1;Port=$Port;Database=bancada;Username=bancada;Password=$password;Include Error Detail=false"; port = $Port; postgresBin = $PostgresBin } | ConvertTo-Json | Set-Content -LiteralPath $settingsPath
 }
 $settings = Get-Content -LiteralPath $settingsPath -Raw | ConvertFrom-Json
+if (-not $settings.PSObject.Properties['demoPassword']) {
+    $settings | Add-Member -NotePropertyName demoPassword -NotePropertyValue ([Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes(20)) + '!bA1')
+    $settings | ConvertTo-Json | Set-Content -LiteralPath $settingsPath
+}
 if ($settings.port -ne $Port) { throw 'Configured port differs from requested port.' }
 if (-not (Test-Path (Join-Path $dataPath 'PG_VERSION'))) {
     $password = ($settings.connectionString -split 'Password=')[1].Split(';')[0]

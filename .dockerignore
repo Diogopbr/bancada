@@ -1,0 +1,12 @@
+.git
+.local
+.superpowers
+.worktrees
+**/node_modules
+**/bin
+**/obj
+**/dist
+**/.angular
+.env*
+test-results
+playwright-report
