@@ -466,7 +466,15 @@
 
     <!-- Modal de Cancelamento de Ordem -->
     @if (showCancelModal()) {
-      <div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title">
+      <div
+        class="modal-backdrop"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cancel-modal-title"
+        appFocusTrap
+        [appFocusTrapEnabled]="!isCancelling()"
+        (escapeKey)="!isCancelling() && closeCancelModal()"
+      >
         <div class="modal-content panel">
           <h2 id="cancel-modal-title" class="modal-title">Cancelar Ordem de Serviço</h2>
           <p class="modal-desc">

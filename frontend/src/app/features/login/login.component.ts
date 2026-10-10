@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,19 +12,24 @@ import { SessionService } from '../../core/session.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
-  private readonly sessionService = inject(SessionService);
+  public readonly sessionService = inject(SessionService);
   private readonly api = inject(ApiClient);
   private readonly router = inject(Router);
 
   public readonly isLoading = signal<boolean>(false);
+  public readonly isStartingDemo = signal<boolean>(false);
   public readonly errorMessage = signal<string>('');
 
   public readonly loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
   });
+
+  ngOnInit(): void {
+    this.sessionService.checkDemoStatus();
+  }
 
   public async onSubmit(): Promise<void> {
     if (this.loginForm.invalid) {
@@ -38,7 +43,6 @@ export class LoginComponent {
     const { email, password } = this.loginForm.getRawValue();
 
     try {
-      // Carrega CSRF antes do login
       await this.api.getCsrf();
       await this.sessionService.login({
         email: email || '',
@@ -57,6 +61,27 @@ export class LoginComponent {
       }
     } finally {
       this.isLoading.set(false);
+    }
+  }
+
+  public async onStartDemo(): Promise<void> {
+    this.isStartingDemo.set(true);
+    this.errorMessage.set('');
+
+    try {
+      await this.sessionService.startDemo();
+      await this.router.navigate(['/ordens']);
+    } catch (err: any) {
+      if (err.status === 429) {
+        this.errorMessage.set('Limite de demonstrações ou requisições atingido. Tente novamente mais tarde.');
+      } else {
+        const problem = ApiClient.extractProblem(err);
+        this.errorMessage.set(
+          problem?.detail || 'Não foi possível iniciar a demonstração privada da oficina.'
+        );
+      }
+    } finally {
+      this.isStartingDemo.set(false);
     }
   }
 

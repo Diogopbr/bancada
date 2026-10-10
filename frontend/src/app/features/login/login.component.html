@@ -6,13 +6,43 @@
         <span class="brand-name">Bancada</span>
       </div>
       <h1 class="login-title">Acesso à Oficina</h1>
-      <p class="login-subtitle">Entre com as credenciais da equipe para acessar as ordens de serviço</p>
+      <p class="login-subtitle">Entre com as credenciais da equipe ou inicie a demonstração guiada</p>
     </header>
 
     @if (errorMessage()) {
       <div class="alert alert-error" role="alert">
         <span>{{ errorMessage() }}</span>
       </div>
+    }
+
+    <!-- Demo Mode Entry Card -->
+    @if (sessionService.isDemoEnabled()) {
+      <section class="demo-entry-card" data-testid="demo-entry-card" aria-label="Demonstração Privada">
+        <div class="demo-badge-row">
+          <span class="demo-pill-tag">Modo Demonstração</span>
+        </div>
+        <h2 class="demo-card-title">Demonstração Privada</h2>
+        <p class="demo-card-desc">
+          Ambiente isolado com dados fictícios descartáveis (até 20 ordens de serviço por visitante, validade de 24h). Não requer senha compartilhada nem expõe informações reais da oficina.
+        </p>
+        <button
+          type="button"
+          class="btn btn-accent w-100"
+          (click)="onStartDemo()"
+          [disabled]="isStartingDemo() || isLoading()"
+          data-testid="start-demo-button"
+        >
+          @if (isStartingDemo()) {
+            Preparando demonstração...
+          } @else {
+            Iniciar Demonstração da Oficina &rarr;
+          }
+        </button>
+
+        <div class="demo-divider">
+          <span>ou acesse com credenciais de equipe</span>
+        </div>
+      </section>
     }
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate class="login-form">
@@ -52,7 +82,7 @@
       <button
         type="submit"
         class="btn btn-primary w-100"
-        [disabled]="isLoading() || loginForm.invalid"
+        [disabled]="isLoading() || isStartingDemo() || loginForm.invalid"
       >
         @if (isLoading()) {
           Entrando...

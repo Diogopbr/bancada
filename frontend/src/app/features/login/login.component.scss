@@ -119,3 +119,58 @@
     text-align: center;
   }
 }
+
+.demo-entry-card {
+  background-color: var(--color-moss-light);
+  border: 1px solid #d4ded4;
+  border-radius: var(--radius-sm);
+  padding: 1.15rem;
+  margin-bottom: 1.5rem;
+
+  .demo-badge-row {
+    margin-bottom: 0.35rem;
+
+    .demo-pill-tag {
+      font-size: 0.725rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-moss-dark);
+      background-color: #dbe6db;
+      padding: 0.15rem 0.45rem;
+      border-radius: 9999px;
+    }
+  }
+
+  .demo-card-title {
+    font-size: 1.1rem;
+    color: var(--color-ink);
+    margin-bottom: 0.35rem;
+  }
+
+  .demo-card-desc {
+    font-size: 0.825rem;
+    color: var(--color-ink-muted);
+    line-height: 1.45;
+    margin-bottom: 0.85rem;
+  }
+
+  .demo-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    color: var(--color-ink-subtle);
+
+    &::before, &::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid #d4ded4;
+    }
+
+    span {
+      padding: 0 0.5rem;
+    }
+  }
+}

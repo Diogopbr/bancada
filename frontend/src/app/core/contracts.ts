@@ -1,5 +1,11 @@
 export type StaffRole = 'receptionist' | 'technician';
 
+export type DemoRole = 'receptionist' | 'technician1' | 'technician2';
+
+export interface DemoStatus {
+  enabled: boolean;
+}
+
 export interface SessionInfo {
   id: string;
   displayName: string;

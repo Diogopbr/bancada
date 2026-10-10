@@ -14,6 +14,8 @@ import {
   TechnicianSummary,
   TransitionPayload,
   ProblemDetails,
+  DemoRole,
+  DemoStatus,
 } from './contracts';
 
 @Injectable({
@@ -84,6 +86,52 @@ export class ApiClient {
       })
     );
     this.csrfToken = null;
+  }
+
+  // --- Demo Endpoints ---
+
+  public async getDemo(): Promise<DemoStatus> {
+    return firstValueFrom(
+      this.http.get<DemoStatus>(`${this.baseUrl}/demo`, {
+        withCredentials: true,
+      })
+    );
+  }
+
+  public async startDemo(): Promise<SessionInfo> {
+    const headers = await this.getWriteHeaders();
+    const session = await firstValueFrom(
+      this.http.post<SessionInfo>(`${this.baseUrl}/demo/start`, {}, {
+        headers,
+        withCredentials: true,
+      })
+    );
+    this.csrfToken = null;
+    return session;
+  }
+
+  public async switchDemoRole(role: DemoRole): Promise<SessionInfo> {
+    const headers = await this.getWriteHeaders();
+    const session = await firstValueFrom(
+      this.http.post<SessionInfo>(`${this.baseUrl}/demo/role`, { role }, {
+        headers,
+        withCredentials: true,
+      })
+    );
+    this.csrfToken = null;
+    return session;
+  }
+
+  public async resetDemo(): Promise<SessionInfo> {
+    const headers = await this.getWriteHeaders();
+    const session = await firstValueFrom(
+      this.http.post<SessionInfo>(`${this.baseUrl}/demo/reset`, {}, {
+        headers,
+        withCredentials: true,
+      })
+    );
+    this.csrfToken = null;
+    return session;
   }
 
   public async getTechnicians(): Promise<TechnicianSummary[]> {

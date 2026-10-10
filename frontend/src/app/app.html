@@ -106,7 +106,89 @@
 
     <!-- Main Workspace -->
     <main class="main-content">
+      @if (sessionService.isDemoEnabled()) {
+        <div class="demo-strip" data-testid="demo-strip" role="region" aria-label="Controles da demonstração">
+          <div class="demo-strip-left">
+            <span class="demo-badge">Modo Demonstração</span>
+            <span class="demo-caption">Dados fictícios descartáveis &bull; Sem métricas inventadas</span>
+          </div>
+          <div class="demo-strip-right">
+            <label for="demo-role-select" class="demo-label">Perfil ativo:</label>
+            <select
+              id="demo-role-select"
+              data-testid="demo-role-select"
+              class="form-select demo-select"
+              [value]="sessionService.currentDemoRole()"
+              (change)="onRoleSelectChange($event)"
+              [disabled]="isSwitchingRole() || isResetting()"
+            >
+              @for (opt of demoRoleOptions; track opt.value) {
+                <option [value]="opt.value">{{ opt.label }}</option>
+              }
+            </select>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              (click)="openResetModal()"
+              [disabled]="isResetting() || isSwitchingRole()"
+            >
+              Reiniciar demonstração
+            </button>
+          </div>
+        </div>
+
+        @if (demoErrorMessage()) {
+          <div class="alert alert-error demo-alert" role="alert">
+            <span>{{ demoErrorMessage() }}</span>
+          </div>
+        }
+      }
+
       <router-outlet />
     </main>
   </div>
+
+  <!-- Modal de Confirmação de Reinício da Demonstração -->
+  @if (showResetModal()) {
+    <div
+      class="modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="demo-reset-modal-title"
+      appFocusTrap
+      [appFocusTrapEnabled]="!isResetting()"
+      (escapeKey)="!isResetting() && closeResetModal()"
+      data-testid="demo-reset-modal"
+    >
+      <div class="modal-content panel">
+        <h2 id="demo-reset-modal-title" class="modal-title">Reiniciar dados da demonstração</h2>
+        <p class="modal-desc">
+          Deseja restaurar as ordens de serviço fictícias para o estado inicial? Quaisquer alterações feitas na sua sessão atual serão descartadas.
+        </p>
+
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="closeResetModal()"
+            [disabled]="isResetting()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="confirmReset()"
+            [disabled]="isResetting()"
+          >
+            @if (isResetting()) {
+              Reiniciando...
+            } @else {
+              Sim, reiniciar demonstração
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 }

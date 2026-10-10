@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { provideRouter, ActivatedRoute } from '@angular/router';
 import { OrderDetailComponent } from './order-detail.component';
 import { ApiClient } from '../../core/api-client';
@@ -9,6 +10,8 @@ describe('OrderDetailComponent', () => {
   let fixture: ComponentFixture<OrderDetailComponent>;
   let mockApiClient: Partial<ApiClient>;
   let mockSessionService: Partial<SessionService>;
+  let isReceptionistSig: ReturnType<typeof signal<boolean>>;
+  let isTechnicianSig: ReturnType<typeof signal<boolean>>;
 
   const sampleOrder: OrderDetail = {
     id: 'ord-abc',
@@ -50,10 +53,13 @@ describe('OrderDetailComponent', () => {
       }),
     };
 
+    isReceptionistSig = signal<boolean>(false);
+    isTechnicianSig = signal<boolean>(true);
+
     mockSessionService = {
       session: vi.fn().mockReturnValue({ id: 'tech-1', displayName: 'Técnico Especialista', role: 'technician' }) as any,
-      isTechnician: vi.fn().mockReturnValue(true) as any,
-      isReceptionist: vi.fn().mockReturnValue(false) as any,
+      isTechnician: isTechnicianSig as any,
+      isReceptionist: isReceptionistSig as any,
       isAuthenticated: vi.fn().mockReturnValue(true) as any,
     };
 
@@ -134,5 +140,41 @@ describe('OrderDetailComponent', () => {
     await fixture.componentInstance.publishQuote();
     expect(mockApiClient.publishQuote).not.toHaveBeenCalled();
     alert.mockRestore();
+  });
+
+  it('should support keyboard dialog behavior on cancel modal: trap focus, close on Esc and restore focus', async () => {
+    isReceptionistSig.set(true);
+    sampleOrder.status = 'received';
+    fixture.componentInstance.order.set(sampleOrder);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const cancelTrigger = fixture.nativeElement.querySelector('.btn-danger') as HTMLElement;
+    expect(cancelTrigger).toBeTruthy();
+    cancelTrigger.focus();
+    expect(document.activeElement).toBe(cancelTrigger);
+
+    cancelTrigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog).toBeTruthy();
+    expect(dialog.getAttribute('aria-labelledby')).toBe('cancel-modal-title');
+
+    // Focus enters dialog
+    const focusable = dialog.querySelectorAll('textarea, button');
+    expect(Array.from(focusable)).toContain(document.activeElement as HTMLElement);
+
+    // Escape closes dialog and restores focus
+    const escEvent = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+    dialog.dispatchEvent(escEvent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.showCancelModal()).toBe(false);
+    expect(document.activeElement).toBe(cancelTrigger);
   });
 });

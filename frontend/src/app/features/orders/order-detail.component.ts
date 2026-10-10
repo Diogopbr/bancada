@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ApiClient } from '../../core/api-client';
 import { SessionService } from '../../core/session.service';
+import { FocusTrapDirective } from '../../core/focus-trap.directive';
 import {
   CustomerAccessResponse,
   OrderDetail,
@@ -23,7 +24,7 @@ interface FormQuoteItem {
 @Component({
   selector: 'app-order-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, FocusTrapDirective],
   templateUrl: './order-detail.component.html',
   styleUrl: './order-detail.component.scss',
 })

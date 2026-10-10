@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { ApiClient } from '../../core/api-client';
+import { FocusTrapDirective } from '../../core/focus-trap.directive';
 import {
   CustomerOrderProjection,
   ORDER_STATUS_LABELS,
@@ -11,7 +12,7 @@ import {
 @Component({
   selector: 'app-customer-view',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FocusTrapDirective],
   templateUrl: './customer-view.component.html',
   styleUrl: './customer-view.component.scss',
 })
@@ -62,11 +63,6 @@ export class CustomerViewComponent implements OnInit {
           if (match && match[1]) {
             token = decodeURIComponent(match[1]);
           }
-        }
-
-        // Fallback para query param (?token=...)
-        if (!token) {
-          token = this.route.snapshot.queryParamMap.get('token');
         }
 
         // Se encontrou token, troca por sessão HttpOnly e remove fragmento da URL
@@ -141,8 +137,8 @@ export class CustomerViewComponent implements OnInit {
       this.pendingDecision.set(null);
       this.successMessage.set(
         decision === 'accepted'
-          ? 'Orçamento aprovado com sucesso! A oficina iniciará o reparo em breve.'
-          : 'Orçamento rejeitado. A equipe técnica foi notificada.'
+          ? 'Orçamento aprovado com sucesso! Decisão registrada e reparo autorizado.'
+          : 'Orçamento rejeitado com sucesso! Decisão registrada na ordem de serviço.'
       );
     } catch (err: any) {
       if (err.status === 409) {

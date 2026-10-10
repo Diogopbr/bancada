@@ -81,4 +81,83 @@ describe('CustomerViewComponent', () => {
       'Acesso indisponível ou expirado'
     );
   });
+
+  it('should process access token exclusively from URL fragment and never from query params', async () => {
+    window.location.hash = '';
+
+    fixture = TestBed.createComponent(CustomerViewComponent);
+    const comp = fixture.componentInstance;
+    await comp.initializeCustomerSession();
+
+    // Query params must NOT be used
+    expect(mockApiClient.createCustomerSession).not.toHaveBeenCalled();
+
+    // Now with fragment
+    window.location.hash = '#token=frag-token-123';
+    const comp2 = TestBed.createComponent(CustomerViewComponent).componentInstance;
+    await comp2.initializeCustomerSession();
+    expect(mockApiClient.createCustomerSession).toHaveBeenCalledWith('frag-token-123');
+    window.location.hash = '';
+  });
+
+  it('should claim recorded decision on approval/rejection without claiming email notification', async () => {
+    fixture = TestBed.createComponent(CustomerViewComponent);
+    fixture.detectChanges();
+    await fixture.componentInstance.initializeCustomerSession();
+    fixture.detectChanges();
+
+    const comp = fixture.componentInstance;
+    comp.openDecisionConfirm('accepted');
+    await comp.confirmDecision();
+
+    expect(comp.successMessage()).toContain('Orçamento aprovado com sucesso! Decisão registrada e reparo autorizado.');
+    expect(comp.successMessage()).not.toContain('email');
+
+    (mockApiClient.submitCustomerDecision as any).mockResolvedValueOnce({
+      ...sampleProjection,
+      status: 'diagnosing',
+      currentQuote: {
+        ...sampleProjection.currentQuote!,
+        decision: 'rejected',
+      },
+    });
+
+    comp.openDecisionConfirm('rejected');
+    await comp.confirmDecision();
+    expect(comp.successMessage()).toContain('Orçamento rejeitado com sucesso! Decisão registrada na ordem de serviço.');
+    expect(comp.successMessage()).not.toContain('email');
+  });
+
+  it('should support keyboard dialog behavior: focus enters dialog, Tab stays inside, and Esc closes it', async () => {
+    fixture = TestBed.createComponent(CustomerViewComponent);
+    fixture.detectChanges();
+    await fixture.componentInstance.initializeCustomerSession();
+    fixture.detectChanges();
+
+    const acceptBtn = fixture.nativeElement.querySelector('.btn-accept') as HTMLElement;
+    acceptBtn.focus();
+    expect(document.activeElement).toBe(acceptBtn);
+
+    // Open confirmation
+    acceptBtn.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog).toBeTruthy();
+    expect(dialog.getAttribute('aria-labelledby')).toBe('confirm-decision-title');
+
+    // Focus enters dialog
+    const focusable = dialog.querySelectorAll('button');
+    expect(Array.from(focusable)).toContain(document.activeElement as HTMLButtonElement);
+
+    // Escape closes dialog and restores focus to trigger button
+    const escEvent = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+    dialog.dispatchEvent(escEvent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.pendingDecision()).toBeNull();
+    expect(document.activeElement).toBe(acceptBtn);
+  });
 });

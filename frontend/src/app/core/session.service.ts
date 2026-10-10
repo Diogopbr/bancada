@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { ApiClient } from './api-client';
-import { SessionInfo, StaffRole } from './contracts';
+import { DemoRole, SessionInfo, StaffRole } from './contracts';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +11,8 @@ export class SessionService {
   public readonly session = signal<SessionInfo | null>(null);
   public readonly isLoading = signal<boolean>(false);
   public readonly isInitialized = signal<boolean>(false);
+  public readonly isDemoEnabled = signal<boolean>(false);
+  public readonly currentDemoRole = signal<DemoRole>('receptionist');
 
   public readonly isAuthenticated = computed(() => this.session() !== null);
   public readonly role = computed<StaffRole | null>(() => this.session()?.role ?? null);
@@ -31,6 +33,38 @@ export class SessionService {
       this.isLoading.set(false);
       this.isInitialized.set(true);
     }
+  }
+
+  public async checkDemoStatus(): Promise<boolean> {
+    try {
+      const status = await this.api.getDemo();
+      this.isDemoEnabled.set(Boolean(status?.enabled));
+      return Boolean(status?.enabled);
+    } catch {
+      this.isDemoEnabled.set(false);
+      return false;
+    }
+  }
+
+  public async startDemo(): Promise<SessionInfo> {
+    const info = await this.api.startDemo();
+    this.session.set(info);
+    this.currentDemoRole.set('receptionist');
+    return info;
+  }
+
+  public async switchDemoRole(role: DemoRole): Promise<SessionInfo> {
+    const info = await this.api.switchDemoRole(role);
+    this.session.set(info);
+    this.currentDemoRole.set(role);
+    return info;
+  }
+
+  public async resetDemo(): Promise<SessionInfo> {
+    const info = await this.api.resetDemo();
+    this.session.set(info);
+    this.currentDemoRole.set('receptionist');
+    return info;
   }
 
   public async login(credentials: { email: string; password: string }): Promise<SessionInfo> {

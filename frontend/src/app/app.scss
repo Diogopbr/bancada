@@ -226,3 +226,64 @@
     padding: 1rem;
   }
 }
+
+/* Demo Strip */
+.demo-strip {
+  background-color: #f2ede2;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+
+  .demo-strip-left {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+
+    .demo-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-moss-dark);
+      background-color: var(--color-moss-light);
+      border: 1px solid #d5e0d5;
+      padding: 0.15rem 0.5rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .demo-caption {
+      font-size: 0.8rem;
+      color: var(--color-ink-muted);
+    }
+  }
+
+  .demo-strip-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    .demo-label {
+      font-size: 0.8rem;
+      color: var(--color-ink);
+      font-weight: 600;
+    }
+
+    .demo-select {
+      font-size: 0.825rem;
+      padding: 0.3rem 0.6rem;
+      min-width: 130px;
+    }
+  }
+}
+
+.demo-alert {
+  margin-bottom: 1rem;
+}
