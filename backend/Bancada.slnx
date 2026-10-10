@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Bancada.Api/Bancada.Api.csproj" />
+  <Project Path="Bancada.Tests/Bancada.Tests.csproj" />
+</Solution>

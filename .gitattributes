@@ -1,0 +1,7 @@
+* text=auto
+*.ps1 text eol=crlf
+*.sh text eol=lf
+*.md text eol=lf
+*.ts text eol=lf
+*.scss text eol=lf
+*.cs text eol=lf
