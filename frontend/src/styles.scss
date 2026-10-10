@@ -1,1 +1,350 @@
-/* You can add global styles to this file, and also import other style files */
+/* Bancada Global Styles & Theme */
+:root {
+  --bg-page: #f7f5ee;
+  --bg-surface: #ffffff;
+  --bg-surface-subtle: #fcfbf7;
+  --bg-sidebar: #1f251f;
+
+  --color-ink: #242924;
+  --color-ink-muted: #575e57;
+  --color-ink-subtle: #7a827a;
+  --color-border: #ded9cb;
+  --color-border-subtle: #eae5d8;
+
+  --color-moss: #486347;
+  --color-moss-light: #eef3ee;
+  --color-moss-dark: #374d36;
+
+  --color-accent: #b84b27;
+  --color-accent-hover: #9e3f1f;
+  --color-accent-light: #fdf3ef;
+
+  /* Status Colors */
+  --status-received-text: #334155;
+  --status-received-bg: #e2e8f0;
+  --status-diagnosing-text: #92400e;
+  --status-diagnosing-bg: #fef3c7;
+  --status-awaiting-text: #5b21b6;
+  --status-awaiting-bg: #ede9fe;
+  --status-approved-text: #275225;
+  --status-approved-bg: #e3f2e3;
+  --status-repairing-text: #0e7490;
+  --status-repairing-bg: #cffafe;
+  --status-ready-text: #166534;
+  --status-ready-bg: #dcfce7;
+  --status-delivered-text: #374151;
+  --status-delivered-bg: #f3f4f6;
+  --status-cancelled-text: #991b1b;
+  --status-cancelled-bg: #fee2e2;
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background-color: var(--bg-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Accessible focus outline */
+:focus-visible {
+  outline: 2px solid var(--color-accent) !important;
+  outline-offset: 2px !important;
+}
+
+/* Typography elements */
+h1, h2, h3, h4 {
+  color: var(--color-ink);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+p {
+  color: var(--color-ink-muted);
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+a:hover {
+  color: var(--color-accent-hover);
+}
+
+/* Standard Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: var(--color-moss);
+  color: #ffffff;
+  border-color: var(--color-moss-dark);
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-moss-dark);
+}
+
+.btn-accent {
+  background-color: var(--color-accent);
+  color: #ffffff;
+  border-color: var(--color-accent-hover);
+}
+.btn-accent:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+}
+
+.btn-secondary {
+  background-color: var(--bg-surface);
+  color: var(--color-ink);
+  border-color: var(--color-border);
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--bg-surface-subtle);
+  border-color: var(--color-ink-subtle);
+}
+
+.btn-danger {
+  background-color: #fff1f1;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+.btn-danger:hover:not(:disabled) {
+  background-color: #fee2e2;
+}
+
+.btn-sm {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.825rem;
+}
+
+/* Standard Form Fields */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.form-input, .form-select, .form-textarea {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: #ffffff;
+  color: var(--color-ink);
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--color-moss);
+}
+.form-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-error {
+  font-size: 0.8rem;
+  color: #b91c1c;
+  margin-top: 0.2rem;
+}
+
+.form-help {
+  font-size: 0.8rem;
+  color: var(--color-ink-subtle);
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.775rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.status-badge::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-received {
+  color: var(--status-received-text);
+  background-color: var(--status-received-bg);
+}
+.status-received::before { background-color: var(--status-received-text); }
+
+.status-diagnosing {
+  color: var(--status-diagnosing-text);
+  background-color: var(--status-diagnosing-bg);
+}
+.status-diagnosing::before { background-color: var(--status-diagnosing-text); }
+
+.status-awaitingApproval {
+  color: var(--status-awaiting-text);
+  background-color: var(--status-awaiting-bg);
+}
+.status-awaitingApproval::before { background-color: var(--status-awaiting-text); }
+
+.status-approved {
+  color: var(--status-approved-text);
+  background-color: var(--status-approved-bg);
+}
+.status-approved::before { background-color: var(--status-approved-text); }
+
+.status-repairing {
+  color: var(--status-repairing-text);
+  background-color: var(--status-repairing-bg);
+}
+.status-repairing::before { background-color: var(--status-repairing-text); }
+
+.status-ready {
+  color: var(--status-ready-text);
+  background-color: var(--status-ready-bg);
+}
+.status-ready::before { background-color: var(--status-ready-text); }
+
+.status-delivered {
+  color: var(--status-delivered-text);
+  background-color: var(--status-delivered-bg);
+}
+.status-delivered::before { background-color: var(--status-delivered-text); }
+
+.status-cancelled {
+  color: var(--status-cancelled-text);
+  background-color: var(--status-cancelled-bg);
+}
+.status-cancelled::before { background-color: var(--status-cancelled-text); }
+
+/* Card Containers */
+.panel {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+}
+
+.code-font {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Alert Boxes */
+.alert {
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.alert-warning {
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+.alert-error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+.alert-info {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+/* Shared Modal Styles */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(36, 41, 36, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 480px;
+  background-color: #ffffff;
+  padding: 1.75rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+
+  .modal-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-desc {
+    font-size: 0.875rem;
+    color: var(--color-ink-muted);
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+}

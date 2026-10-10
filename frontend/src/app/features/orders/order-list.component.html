@@ -1,0 +1,230 @@
+<div class="orders-workspace">
+  <header class="workspace-header">
+    <div class="title-area">
+      <h1 class="page-title">Ordens de serviço</h1>
+      <p class="page-subtitle">Acompanhamento diário da oficina, diagnósticos e orçamentos</p>
+    </div>
+
+    @if (sessionService.isReceptionist()) {
+      <div class="header-actions">
+        <a routerLink="/ordens/nova" class="btn btn-accent" data-testid="create-order-button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Nova ordem
+        </a>
+      </div>
+    }
+  </header>
+
+  <!-- Filter Bar -->
+  <section class="filters-panel" aria-label="Filtros de busca">
+    <div class="filters-row">
+      <div class="filter-item search-box">
+        <label for="search-input" class="visually-hidden">Buscar ordens</label>
+        <div class="input-icon-wrapper">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            id="search-input"
+            type="search"
+            class="form-input search-input"
+            placeholder="Buscar por código, equipamento ou cliente..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event); onFilterChange()"
+          />
+        </div>
+      </div>
+
+      <div class="filter-item">
+        <label for="status-select" class="visually-hidden">Filtrar por situação</label>
+        <select
+          id="status-select"
+          class="form-select"
+          [ngModel]="statusFilter()"
+          (ngModelChange)="statusFilter.set($event); onFilterChange()"
+        >
+          <option value="">Todas as situações</option>
+          @for (opt of statusOptions; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <label for="tech-select" class="visually-hidden">Filtrar por técnico</label>
+        <select
+          id="tech-select"
+          class="form-select"
+          [ngModel]="technicianFilter()"
+          (ngModelChange)="technicianFilter.set($event); onFilterChange()"
+        >
+          <option value="">Todos os técnicos</option>
+          @for (tech of technicians(); track tech.id) {
+            <option [value]="tech.id">{{ tech.displayName }}</option>
+          }
+        </select>
+      </div>
+
+      @if (hasActiveFilters()) {
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
+          (click)="clearFilters()"
+          data-testid="clear-filters-button"
+        >
+          Limpar filtros
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Content State: Loading -->
+  @if (isLoading()) {
+    <div class="state-card loading-state" role="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Carregando ordens de serviço da oficina...</p>
+    </div>
+  }
+
+  <!-- Content State: Error -->
+  @else if (hasError()) {
+    <div class="state-card error-state" data-testid="error-state" role="alert">
+      <div class="state-icon warning" aria-hidden="true">!</div>
+      <h2>Não foi possível carregar as ordens de serviço</h2>
+      <p>{{ errorMessage() }}</p>
+      <button type="button" class="btn btn-primary" (click)="loadOrders()" data-testid="retry-button">
+        Tentar novamente
+      </button>
+    </div>
+  }
+
+  <!-- Content State: Empty Orders (No records at all) -->
+  @else if (isEmpty()) {
+    <div class="state-card empty-state" data-testid="empty-orders-state">
+      <div class="empty-icon" aria-hidden="true">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+      </div>
+      <h2>Nenhuma ordem de serviço cadastrada</h2>
+      <p>A oficina ainda não possui ordens de serviço abertas no momento.</p>
+      <div class="state-action">
+        <a routerLink="/ordens/nova" class="btn btn-accent" data-testid="create-order-button">
+          Nova ordem
+        </a>
+      </div>
+    </div>
+  }
+
+  <!-- Content State: No Matches (Filters applied, 0 results) -->
+  @else if (hasNoMatches()) {
+    <div class="state-card empty-state" data-testid="no-matches-state">
+      <div class="empty-icon" aria-hidden="true">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          <line x1="8" y1="11" x2="14" y2="11"></line>
+        </svg>
+      </div>
+      <h2>Nenhuma ordem encontrada para os filtros aplicados</h2>
+      <p>Tente alterar o termo de busca ou selecionar outra situação para localizar ordens.</p>
+      <div class="state-action">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="clearFilters()"
+          data-testid="clear-filters-button"
+        >
+          Limpar filtros
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Content State: Orders Table -->
+  @else {
+    <div class="table-container">
+      <table class="orders-table" aria-label="Tabela de ordens de serviço">
+        <thead>
+          <tr>
+            <th scope="col" class="th-code">Código</th>
+            <th scope="col" class="th-equip">Equipamento &amp; Cliente</th>
+            <th scope="col" class="th-tech">Técnico</th>
+            <th scope="col" class="th-status">Situação</th>
+            <th scope="col" class="th-updated">Última atualização</th>
+            <th scope="col" class="th-actions">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of orders(); track order.id) {
+            <tr class="order-row">
+              <td class="cell-code">
+                <span class="code-badge code-font">{{ order.code }}</span>
+              </td>
+              <td class="cell-equip">
+                <div class="equipment-name">{{ order.equipmentLabel }}</div>
+                <div class="customer-name">{{ order.customerName }}</div>
+              </td>
+              <td class="cell-tech">
+                <span class="tech-name">{{ order.technicianName }}</span>
+              </td>
+              <td class="cell-status">
+                <span class="status-badge status-{{ order.status }}">
+                  {{ getStatusLabel(order.status) }}
+                </span>
+              </td>
+              <td class="cell-updated">
+                <time [attr.datetime]="order.updatedAt" class="date-text">
+                  {{ formatDate(order.updatedAt) }}
+                </time>
+              </td>
+              <td class="cell-actions">
+                <a [routerLink]="['/ordens', order.id]" class="btn btn-secondary btn-sm link-detail">
+                  Detalhes
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Cards List -->
+    <div class="mobile-orders-list" aria-label="Lista de ordens para telas menores">
+      @for (order of orders(); track order.id) {
+        <article class="order-card-mobile panel">
+          <div class="mobile-card-header">
+            <span class="code-badge code-font">{{ order.code }}</span>
+            <span class="status-badge status-{{ order.status }}">
+              {{ getStatusLabel(order.status) }}
+            </span>
+          </div>
+
+          <div class="mobile-card-body">
+            <h3 class="equipment-name">{{ order.equipmentLabel }}</h3>
+            <p class="customer-name">Cliente: <strong>{{ order.customerName }}</strong></p>
+            <p class="tech-name">Técnico: {{ order.technicianName }}</p>
+            <p class="date-text">Atualizado: {{ formatDate(order.updatedAt) }}</p>
+          </div>
+
+          <div class="mobile-card-footer">
+            <a [routerLink]="['/ordens', order.id]" class="btn btn-secondary btn-sm w-100">
+              Ver detalhes da ordem
+            </a>
+          </div>
+        </article>
+      }
+    </div>
+
+    <footer class="table-footer">
+      <span class="total-count">Total: {{ total() }} ordem(ns) de serviço</span>
+    </footer>
+  }
+</div>

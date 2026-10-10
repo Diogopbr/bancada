@@ -1,0 +1,508 @@
+<div class="order-detail-workspace">
+  <div class="breadcrumb-nav">
+    <a routerLink="/ordens" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Voltar para a lista de ordens
+    </a>
+  </div>
+
+  @if (isLoading()) {
+    <div class="state-card loading-state panel" role="status">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Carregando dados da ordem de serviço...</p>
+    </div>
+  } @else if (hasError() || !order()) {
+    <div class="state-card error-state panel" role="alert">
+      <h2>Erro ao abrir ordem</h2>
+      <p>{{ errorMessage() }}</p>
+      <button type="button" class="btn btn-primary" (click)="loadOrder()">Tentar novamente</button>
+    </div>
+  } @else {
+    @let o = order()!;
+
+    <!-- Concurrency Conflict Alert (409) -->
+    @if (conflictMessage()) {
+      <div class="alert alert-warning" role="alert">
+        <div class="alert-content">
+          <strong>Atenção:</strong> {{ conflictMessage() }}
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="loadOrder()">
+          Recarregar dados agora
+        </button>
+      </div>
+    }
+
+    <!-- Header Section -->
+    <header class="order-header panel">
+      <div class="header-main">
+        <div class="code-title-group">
+          <span class="order-code code-font">{{ o.code }}</span>
+          <span class="status-badge status-{{ o.status }}">{{ getStatusLabel(o.status) }}</span>
+          <span class="version-tag">versão {{ o.version }}</span>
+        </div>
+        <div class="header-timestamps">
+          <span class="meta-label">Última atualização:</span>
+          <time [attr.datetime]="o.updatedAt">{{ formatDate(o.updatedAt) }}</time>
+        </div>
+      </div>
+
+      <!-- Contextual Action Bar -->
+      <div class="context-actions-bar">
+        @if (canStartRepair()) {
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="transition('repairing')"
+            [disabled]="isTransitioning()"
+          >
+            Iniciar Reparo
+          </button>
+        }
+
+        @if (canCompleteRepair()) {
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="transition('ready')"
+            [disabled]="isTransitioning()"
+          >
+            Concluir Reparo
+          </button>
+        }
+
+        @if (canDeliver()) {
+          <button
+            type="button"
+            class="btn btn-accent"
+            (click)="transition('delivered')"
+            [disabled]="isTransitioning()"
+          >
+            Confirmar Entrega ao Cliente
+          </button>
+        }
+
+        @if (canCancel()) {
+          <button
+            type="button"
+            class="btn btn-danger btn-sm"
+            (click)="openCancelModal()"
+            [disabled]="isTransitioning()"
+          >
+            Cancelar Ordem
+          </button>
+        }
+      </div>
+    </header>
+
+    <div class="detail-grid">
+      <!-- Coluna Principal (Esquerda) -->
+      <div class="main-column">
+        <!-- Card: Equipamento & Cliente -->
+        <section class="section-card panel">
+          <h2 class="card-title">Ficha do Equipamento</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Equipamento</span>
+              <strong class="info-value">{{ o.equipmentLabel }}</strong>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Número de série</span>
+              <span class="info-value code-font">{{ o.equipmentSerial || 'Não informado' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Cliente</span>
+              <span class="info-value">{{ o.customerName }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Email do cliente</span>
+              <span class="info-value">{{ o.customerEmail }}</span>
+            </div>
+          </div>
+
+          <div class="issue-box">
+            <span class="info-label">Problema relatado na entrada:</span>
+            <p class="issue-text">{{ o.reportedIssue }}</p>
+          </div>
+        </section>
+
+        <!-- Card: Diagnóstico Técnico -->
+        <section class="section-card panel">
+          <div class="card-header-row">
+            <h2 class="card-title">Diagnóstico Técnico</h2>
+            @if (canEditDiagnosis() && !isEditingDiagnosis()) {
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                (click)="startEditingDiagnosis()"
+              >
+                {{ o.diagnosis ? 'Editar diagnóstico' : 'Registrar diagnóstico' }}
+              </button>
+            }
+          </div>
+
+          <div class="tech-info-row">
+            <span class="info-label">Técnico responsável:</span>
+            <strong>{{ o.technicianName }}</strong>
+          </div>
+
+          @if (isEditingDiagnosis()) {
+            <div class="diagnosis-edit-form">
+              <label for="diagnosis-textarea" class="visually-hidden">Descrição do diagnóstico</label>
+              <textarea
+                id="diagnosis-textarea"
+                class="form-textarea"
+                rows="5"
+                [ngModel]="diagnosisText()"
+                (ngModelChange)="diagnosisText.set($event)"
+                placeholder="Descreva a avaliação dos componentes, falhas encontradas e solução técnica recomendada..."
+                maxlength="4000"
+              ></textarea>
+              @if (o.status === 'received') {
+                <p class="form-help">
+                  <strong>Atenção:</strong> Ao salvar o diagnóstico, a ordem passará automaticamente para o estado "Em diagnóstico".
+                </p>
+              }
+              <div class="edit-actions">
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  (click)="cancelEditingDiagnosis()"
+                  [disabled]="isSavingDiagnosis()"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  (click)="saveDiagnosis()"
+                  [disabled]="isSavingDiagnosis() || !diagnosisText().trim()"
+                >
+                  @if (isSavingDiagnosis()) { Salvando... } @else { Salvar Diagnóstico }
+                </button>
+              </div>
+            </div>
+          } @else {
+            @if (o.diagnosis) {
+              <div class="diagnosis-content">
+                <p>{{ o.diagnosis }}</p>
+              </div>
+            } @else {
+              <div class="empty-field-notice">
+                <p>Nenhum diagnóstico registrado até o momento.</p>
+              </div>
+            }
+          }
+        </section>
+
+        <!-- Card: Orçamento e Revisões -->
+        <section class="section-card panel">
+          <div class="card-header-row">
+            <h2 class="card-title">Orçamento de Reparo</h2>
+            @if (canPublishQuote() && !isEditingQuote()) {
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                (click)="startEditingQuote()"
+              >
+                {{ o.currentQuote ? 'Nova revisão de orçamento' : 'Publicar orçamento' }}
+              </button>
+            }
+          </div>
+
+          @if (isEditingQuote()) {
+            <div class="quote-edit-form">
+              <div class="alert alert-info">
+                <small>
+                  Publicar uma nova revisão anula qualquer aprovação anterior do cliente e define o estado como "Aguardando aprovação". O total é calculado exclusivamente pelo servidor.
+                </small>
+              </div>
+
+              <div class="items-table-wrapper">
+                <table class="quote-items-table">
+                  <thead>
+                    <tr>
+                      <th>Descrição</th>
+                      <th>Tipo</th>
+                      <th class="th-qty">Qtd</th>
+                      <th class="th-price">Preço Unitário (R$)</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of quoteItems(); track $index) {
+                      <tr>
+                        <td>
+                          <input
+                            type="text"
+                            class="form-input"
+                            [(ngModel)]="item.description"
+                            placeholder="Peça ou serviço..."
+                            maxlength="200"
+                          />
+                        </td>
+                        <td>
+                          <select class="form-select" [(ngModel)]="item.kind">
+                            <option value="part">Peça</option>
+                            <option value="labor">Mão de obra</option>
+                          </select>
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            class="form-input"
+                            [(ngModel)]="item.quantity"
+                            min="1"
+                            max="999"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            class="form-input"
+                            [(ngModel)]="item.unitPrice"
+                            placeholder="0.00"
+                          />
+                        </td>
+                        <td>
+                          @if (quoteItems().length > 1) {
+                            <button
+                              type="button"
+                              class="btn btn-danger btn-sm"
+                              (click)="removeQuoteItem($index)"
+                              aria-label="Remover item"
+                            >
+                              &times;
+                            </button>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="quote-edit-controls">
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  (click)="addQuoteItem()"
+                >
+                  + Adicionar item
+                </button>
+              </div>
+
+              <div class="edit-actions">
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  (click)="cancelEditingQuote()"
+                  [disabled]="isPublishingQuote()"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  (click)="publishQuote()"
+                  [disabled]="isPublishingQuote()"
+                >
+                  @if (isPublishingQuote()) { Publicando... } @else { Publicar Orçamento }
+                </button>
+              </div>
+            </div>
+          } @else {
+            @if (o.currentQuote) {
+              @let q = o.currentQuote;
+              <div class="current-quote-view">
+                <div class="quote-meta-bar">
+                  <span class="revision-badge">Revisão #{{ q.revision }}</span>
+                  <span class="published-at">Publicado em {{ formatDate(q.publishedAt) }}</span>
+                  <span class="decision-status">
+                    Decisão do cliente:
+                    @if (q.decision === 'accepted') {
+                      <strong class="decision-accepted">Aprovado</strong>
+                    } @else if (q.decision === 'rejected') {
+                      <strong class="decision-rejected">Rejeitado</strong>
+                    } @else {
+                      <span class="decision-pending">Aguardando resposta</span>
+                    }
+                  </span>
+                </div>
+
+                <table class="quote-display-table">
+                  <thead>
+                    <tr>
+                      <th>Item / Serviço</th>
+                      <th>Tipo</th>
+                      <th class="text-right">Qtd</th>
+                      <th class="text-right">Preço Unit.</th>
+                      <th class="text-right">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of q.items; track item.description) {
+                      <tr>
+                        <td>{{ item.description }}</td>
+                        <td>
+                          <span class="kind-tag">{{ item.kind === 'part' ? 'Peça' : 'Mão de obra' }}</span>
+                        </td>
+                        <td class="text-right">{{ item.quantity }}</td>
+                        <td class="text-right code-font">{{ formatBrl(item.unitPrice) }}</td>
+                        <td class="text-right code-font">
+                          {{ formatBrl(item.quantity * (+item.unitPrice)) }}
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="4" class="text-right font-bold">Total do orçamento:</td>
+                      <td class="text-right code-font font-bold quote-total-value">
+                        {{ formatBrl(q.total) }}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            } @else {
+              <div class="empty-field-notice">
+                <p>Nenhum orçamento publicado. Diagnóstico é obrigatório para publicar um orçamento.</p>
+              </div>
+            }
+          }
+        </section>
+      </div>
+
+      <!-- Coluna Lateral (Direita) -->
+      <aside class="sidebar-column">
+        <!-- Card: Link do Cliente (Atendente) -->
+        @if (sessionService.isReceptionist()) {
+          <section class="section-card panel customer-link-card">
+            <h2 class="card-title">Acesso do Cliente</h2>
+            <p class="card-desc">Gere um link temporário exclusivo para o cliente acompanhar e aprovar o orçamento.</p>
+
+            @if (customerAccess()) {
+              <div class="access-result-box">
+                <label for="access-url" class="info-label">Link de acompanhamento gerado:</label>
+                <div class="link-copy-row">
+                  <input
+                    id="access-url"
+                    type="text"
+                    class="form-input code-font"
+                    [value]="customerAccess()!.url"
+                    readonly
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-secondary btn-sm"
+                    (click)="copyLink(customerAccess()!.url)"
+                  >
+                    Copiar
+                  </button>
+                </div>
+
+                @if (copyFeedback()) {
+                  <span class="copy-success-msg">{{ copyFeedback() }}</span>
+                }
+
+                <div class="link-actions">
+                  <a [href]="customerAccess()!.url" target="_blank" rel="noopener" class="open-link">
+                    Abrir link em nova aba &rarr;
+                  </a>
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm revoke-btn"
+                    (click)="revokeCustomerAccess()"
+                  >
+                    Revogar acesso
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <button
+                type="button"
+                class="btn btn-secondary w-100"
+                (click)="generateCustomerAccess()"
+                [disabled]="isGeneratingAccess()"
+              >
+                @if (isGeneratingAccess()) {
+                  Gerando link...
+                } @else {
+                  Gerar link de acompanhamento
+                }
+              </button>
+            }
+          </section>
+        }
+
+        <!-- Card: Linha do Tempo / Histórico -->
+        <section class="section-card panel history-card">
+          <h2 class="card-title">Histórico de Eventos</h2>
+          <ol class="timeline" aria-label="Histórico de alterações da ordem">
+            @for (event of o.history; track event.id) {
+              <li class="timeline-item">
+                <div class="timeline-dot" aria-hidden="true"></div>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <span class="event-action">{{ event.detail || event.action }}</span>
+                    <time [attr.datetime]="event.createdAt" class="event-time">
+                      {{ formatDate(event.createdAt) }}
+                    </time>
+                  </div>
+                  <span class="event-actor">Por {{ event.actorName }}</span>
+                </div>
+              </li>
+            }
+          </ol>
+        </section>
+      </aside>
+    </div>
+
+    <!-- Modal de Cancelamento de Ordem -->
+    @if (showCancelModal()) {
+      <div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title">
+        <div class="modal-content panel">
+          <h2 id="cancel-modal-title" class="modal-title">Cancelar Ordem de Serviço</h2>
+          <p class="modal-desc">
+            Esta ação é irreversível e encerra o ciclo de atendimento do equipamento. Um motivo obrigatório deve ser informado.
+          </p>
+
+          <div class="form-group">
+            <label for="cancel-reason" class="form-label">Motivo do cancelamento *</label>
+            <textarea
+              id="cancel-reason"
+              class="form-textarea"
+              rows="3"
+              [ngModel]="cancelReason()"
+              (ngModelChange)="cancelReason.set($event)"
+              placeholder="Ex: Cliente desistiu do conserto por inviabilidade técnica..."
+              maxlength="500"
+            ></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="closeCancelModal()"
+              [disabled]="isCancelling()"
+            >
+              Voltar
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              (click)="confirmCancel()"
+              [disabled]="isCancelling() || !cancelReason().trim()"
+            >
+              @if (isCancelling()) { Cancelando... } @else { Confirmar Cancelamento }
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

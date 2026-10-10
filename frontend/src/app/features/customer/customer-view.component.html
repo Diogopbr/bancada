@@ -1,0 +1,210 @@
+<div class="customer-sheet-wrapper">
+  <div class="customer-container panel">
+    <header class="customer-header">
+      <div class="brand-line">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span class="brand-text">Bancada &bull; Assistência Técnica</span>
+      </div>
+      <h1 class="customer-title">Acompanhamento do Equipamento</h1>
+      <p class="customer-subtitle">Situação atualizada do reparo e consulta de orçamento</p>
+    </header>
+
+    @if (isLoading()) {
+      <div class="state-card loading-state" role="status">
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Buscando informações da ordem de serviço...</p>
+      </div>
+    } @else if (isExpired()) {
+      <div class="state-card expired-state" role="alert">
+        <div class="expired-icon" aria-hidden="true">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <h2>Acesso indisponível ou expirado</h2>
+        <p>
+          O link de acompanhamento não foi localizado ou atingiu o prazo de validade de 7 dias. Se a oficina gerou um novo link, utilize o link mais recente enviado.
+        </p>
+        <p class="expired-contact">
+          Caso necessite de informações sobre seu equipamento, entre em contato diretamente com a equipe da Bancada.
+        </p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="state-card error-state" role="alert">
+        <h2>Não foi possível carregar as informações</h2>
+        <p>{{ errorMessage() }}</p>
+        <button type="button" class="btn btn-primary" (click)="initializeCustomerSession()">
+          Tentar novamente
+        </button>
+      </div>
+    } @else {
+      @let o = order()!;
+
+      <!-- Success or Conflict banners -->
+      @if (successMessage()) {
+        <div class="alert alert-info" role="status">
+          <span>{{ successMessage() }}</span>
+        </div>
+      }
+
+      @if (conflictMessage()) {
+        <div class="alert alert-warning" role="alert">
+          <span>{{ conflictMessage() }}</span>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="loadOrderProjection()">
+            Recarregar dados
+          </button>
+        </div>
+      }
+
+      <!-- Resumo do Equipamento -->
+      <section class="order-summary-box">
+        <div class="summary-top">
+          <span class="order-code code-font">{{ o.code }}</span>
+          <span class="status-badge status-{{ o.status }}">{{ getStatusLabel(o.status) }}</span>
+        </div>
+        <h2 class="equipment-headline">{{ o.equipmentLabel }}</h2>
+      </section>
+
+      <!-- Seção do Orçamento -->
+      @if (o.currentQuote) {
+        @let q = o.currentQuote;
+        <section class="quote-sheet-section">
+          <header class="quote-sheet-header">
+            <h2 class="section-title">Orçamento de Serviço</h2>
+            <span class="revision-indicator">Revisão #{{ q.revision }}</span>
+          </header>
+
+          <div class="quote-items-container">
+            <ul class="customer-items-list" aria-label="Itens do orçamento">
+              @for (item of q.items; track item.description) {
+                <li class="item-row">
+                  <div class="item-info">
+                    <span class="item-desc">{{ item.description }}</span>
+                    <span class="item-meta">
+                      {{ item.kind === 'part' ? 'Peça' : 'Mão de obra' }} &bull; Qtd: {{ item.quantity }} &times; {{ formatBrl(item.unitPrice) }}
+                    </span>
+                  </div>
+                  <div class="item-subtotal code-font">
+                    {{ formatBrl(item.quantity * (+item.unitPrice)) }}
+                  </div>
+                </li>
+              }
+            </ul>
+
+            <div class="total-row">
+              <span class="total-label">Valor total do conserto:</span>
+              <strong class="total-value code-font">{{ formatBrl(q.total) }}</strong>
+            </div>
+          </div>
+
+          <!-- Decisão do Cliente -->
+          <div class="decision-area">
+            @if (q.decision === 'accepted') {
+              <div class="decision-banner banner-accepted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Orçamento aprovado. Reparo em andamento pela equipe técnica.</span>
+              </div>
+            } @else if (q.decision === 'rejected') {
+              <div class="decision-banner banner-rejected">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="15" y1="9" x2="9" y2="15"></line>
+                  <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+                <span>Orçamento rejeitado por você. A equipe da oficina entrará em contato.</span>
+              </div>
+            } @else if (canDecide()) {
+              <div class="decision-actions-box">
+                <p class="decision-prompt">
+                  Por favor, revise os itens acima e escolha uma das opções para prosseguir com o atendimento:
+                </p>
+                <div class="decision-buttons">
+                  <button
+                    type="button"
+                    class="btn btn-secondary btn-reject"
+                    (click)="openDecisionConfirm('rejected')"
+                    [disabled]="isDeciding()"
+                  >
+                    Rejeitar orçamento
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-accent btn-accept"
+                    (click)="openDecisionConfirm('accepted')"
+                    [disabled]="isDeciding()"
+                  >
+                    Aprovar orçamento
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Linha do Tempo Pública -->
+      @if (o.history && o.history.length > 0) {
+        <section class="public-timeline-section">
+          <h2 class="section-title">Histórico de Atendimento</h2>
+          <ol class="public-timeline" aria-label="Histórico público do equipamento">
+            @for (event of o.history; track event.id) {
+              <li class="timeline-step">
+                <div class="step-dot" aria-hidden="true"></div>
+                <div class="step-body">
+                  <span class="step-title">{{ event.detail || event.action }}</span>
+                  <time [attr.datetime]="event.createdAt" class="step-date">
+                    {{ formatDate(event.createdAt) }}
+                  </time>
+                </div>
+              </li>
+            }
+          </ol>
+        </section>
+      }
+
+      <!-- Modal de Confirmação de Decisão -->
+      @if (pendingDecision()) {
+        <div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="confirm-decision-title">
+          <div class="modal-content panel">
+            <h2 id="confirm-decision-title" class="modal-title">
+              {{ pendingDecision() === 'accepted' ? 'Confirmar Aprovação do Orçamento' : 'Confirmar Rejeição do Orçamento' }}
+            </h2>
+            <p class="modal-desc">
+              @if (pendingDecision() === 'accepted') {
+                Ao aprovar o orçamento no valor de <strong>{{ formatBrl(o.currentQuote?.total || '0') }}</strong>, você autoriza a equipe da Bancada a iniciar a troca de peças e execução dos serviços técnicos.
+              } @else {
+                Ao rejeitar este orçamento, o equipamento permanecerá na oficina para reavaliação ou retirada sem realização do reparo.
+              }
+            </p>
+
+            <div class="modal-actions">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="cancelDecision()"
+                [disabled]="isDeciding()"
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                [class]="pendingDecision() === 'accepted' ? 'btn btn-accent' : 'btn btn-danger'"
+                (click)="confirmDecision()"
+                [disabled]="isDeciding()"
+              >
+                @if (isDeciding()) {
+                  Enviando resposta...
+                } @else {
+                  {{ pendingDecision() === 'accepted' ? 'Sim, aprovar serviço' : 'Sim, rejeitar orçamento' }}
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

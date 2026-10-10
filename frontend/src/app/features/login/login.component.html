@@ -1,0 +1,98 @@
+<div class="login-wrapper">
+  <div class="login-card panel">
+    <header class="login-header">
+      <div class="brand-badge">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span class="brand-name">Bancada</span>
+      </div>
+      <h1 class="login-title">Acesso à Oficina</h1>
+      <p class="login-subtitle">Entre com as credenciais da equipe para acessar as ordens de serviço</p>
+    </header>
+
+    @if (errorMessage()) {
+      <div class="alert alert-error" role="alert">
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate class="login-form">
+      <div class="form-group">
+        <label for="email" class="form-label">Email corporativo</label>
+        <input
+          id="email"
+          type="email"
+          class="form-input"
+          formControlName="email"
+          placeholder="exemplo@bancada.example"
+          autocomplete="username"
+        />
+        @if (loginForm.get('email')?.touched && loginForm.get('email')?.errors?.['required']) {
+          <span class="form-error">O email é obrigatório.</span>
+        }
+        @if (loginForm.get('email')?.touched && loginForm.get('email')?.errors?.['email']) {
+          <span class="form-error">Informe um email válido.</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Senha</label>
+        <input
+          id="password"
+          type="password"
+          class="form-input"
+          formControlName="password"
+          placeholder="Digite sua senha"
+          autocomplete="current-password"
+        />
+        @if (loginForm.get('password')?.touched && loginForm.get('password')?.errors?.['required']) {
+          <span class="form-error">A senha é obrigatória.</span>
+        }
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary w-100"
+        [disabled]="isLoading() || loginForm.invalid"
+      >
+        @if (isLoading()) {
+          Entrando...
+        } @else {
+          Entrar no sistema
+        }
+      </button>
+    </form>
+
+    <footer class="demo-section">
+      <h2 class="demo-title">Contas de demonstração da oficina</h2>
+      <div class="demo-pills">
+        <button
+          type="button"
+          class="demo-pill"
+          (click)="fillDemoCredentials('atendente@bancada.example')"
+        >
+          <span class="pill-role">Atendente</span>
+          <span class="pill-email">atendente&#64;bancada.example</span>
+        </button>
+
+        <button
+          type="button"
+          class="demo-pill"
+          (click)="fillDemoCredentials('tecnico1@bancada.example')"
+        >
+          <span class="pill-role">Técnico 1</span>
+          <span class="pill-email">tecnico1&#64;bancada.example</span>
+        </button>
+
+        <button
+          type="button"
+          class="demo-pill"
+          (click)="fillDemoCredentials('tecnico2@bancada.example')"
+        >
+          <span class="pill-role">Técnico 2</span>
+          <span class="pill-email">tecnico2&#64;bancada.example</span>
+        </button>
+      </div>
+      <p class="demo-note">A senha corresponde à variável BANCADA_DEMO_PASSWORD configurada no ambiente.</p>
+    </footer>
+  </div>
+</div>

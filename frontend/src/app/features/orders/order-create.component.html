@@ -1,0 +1,151 @@
+<div class="order-create-workspace">
+  <div class="breadcrumb-nav">
+    <a routerLink="/ordens" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Voltar para a lista de ordens
+    </a>
+  </div>
+
+  <div class="form-container panel">
+    <header class="form-header">
+      <h1 class="page-title">Nova Ordem de Serviço</h1>
+      <p class="page-subtitle">Recebimento do equipamento, registro do cliente e atribuição inicial do técnico</p>
+    </header>
+
+    @if (errorMessage()) {
+      <div class="alert alert-error" role="alert">
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <form [formGroup]="createForm" (ngSubmit)="onSubmit()" novalidate class="order-form">
+      <!-- Seção: Dados do Cliente -->
+      <fieldset class="form-section">
+        <legend class="section-title">Dados do Cliente</legend>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="customerName" class="form-label">Nome completo do cliente *</label>
+            <input
+              id="customerName"
+              type="text"
+              class="form-input"
+              formControlName="customerName"
+              placeholder="Ex: Carlos Eduardo de Oliveira"
+              maxlength="120"
+            />
+            @if (createForm.get('customerName')?.touched && createForm.get('customerName')?.errors?.['required']) {
+              <span class="form-error">O nome do cliente é obrigatório.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="customerEmail" class="form-label">Email de contato *</label>
+            <input
+              id="customerEmail"
+              type="email"
+              class="form-input"
+              formControlName="customerEmail"
+              placeholder="carlos@exemplo.com.br"
+            />
+            @if (createForm.get('customerEmail')?.touched && createForm.get('customerEmail')?.errors?.['required']) {
+              <span class="form-error">O email é obrigatório para envio do link de acompanhamento.</span>
+            }
+            @if (createForm.get('customerEmail')?.touched && createForm.get('customerEmail')?.errors?.['email']) {
+              <span class="form-error">Informe um email válido.</span>
+            }
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Seção: Equipamento e Defeito -->
+      <fieldset class="form-section">
+        <legend class="section-title">Equipamento &amp; Defeito Relatado</legend>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="equipmentLabel" class="form-label">Equipamento (marca/modelo) *</label>
+            <input
+              id="equipmentLabel"
+              type="text"
+              class="form-input"
+              formControlName="equipmentLabel"
+              placeholder="Ex: Notebook Lenovo ThinkPad E14"
+              maxlength="120"
+            />
+            @if (createForm.get('equipmentLabel')?.touched && createForm.get('equipmentLabel')?.errors?.['required']) {
+              <span class="form-error">A identificação do equipamento é obrigatória.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="equipmentSerial" class="form-label">Número de série ou patrimônio (opcional)</label>
+            <input
+              id="equipmentSerial"
+              type="text"
+              class="form-input"
+              formControlName="equipmentSerial"
+              placeholder="Ex: PF-28K9LM"
+              maxlength="100"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reportedIssue" class="form-label">Problema relatado pelo cliente *</label>
+          <textarea
+            id="reportedIssue"
+            class="form-textarea"
+            rows="4"
+            formControlName="reportedIssue"
+            placeholder="Descreva detalhadamente a queixa do cliente (ex: não liga após queda de energia, LED pisca em vermelho 3 vezes)..."
+            maxlength="2000"
+          ></textarea>
+          <span class="form-help">Máximo de 2000 caracteres.</span>
+          @if (createForm.get('reportedIssue')?.touched && createForm.get('reportedIssue')?.errors?.['required']) {
+            <span class="form-error">O defeito relatado é obrigatório.</span>
+          }
+        </div>
+      </fieldset>
+
+      <!-- Seção: Atribuição Técnica -->
+      <fieldset class="form-section">
+        <legend class="section-title">Atribuição de Responsabilidade</legend>
+
+        <div class="form-group tech-assign-group">
+          <label for="technicianId" class="form-label">Técnico responsável pelo diagnóstico *</label>
+          <select id="technicianId" class="form-select" formControlName="technicianId">
+            <option value="" disabled>Selecione um técnico da oficina</option>
+            @for (tech of technicians(); track tech.id) {
+              <option [value]="tech.id">{{ tech.displayName }}</option>
+            }
+          </select>
+          <span class="form-help">Toda ordem precisa de um técnico responsável atribuído na abertura.</span>
+          @if (createForm.get('technicianId')?.touched && createForm.get('technicianId')?.errors?.['required']) {
+            <span class="form-error">Selecione o técnico responsável.</span>
+          }
+        </div>
+      </fieldset>
+
+      <div class="form-actions">
+        <a routerLink="/ordens" class="btn btn-secondary">
+          Cancelar
+        </a>
+        <button
+          type="submit"
+          class="btn btn-accent"
+          [disabled]="isSubmitting() || createForm.invalid"
+        >
+          @if (isSubmitting()) {
+            Registrando ordem...
+          } @else {
+            Abrir Ordem de Serviço
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

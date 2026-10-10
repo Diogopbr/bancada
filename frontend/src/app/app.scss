@@ -1,0 +1,228 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.standalone-layout {
+  min-height: 100vh;
+}
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: var(--bg-sidebar);
+  color: #e5ebe5;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  border-right: 1px solid #141a14;
+}
+
+.sidebar-header {
+  padding: 1.5rem 1.25rem 1.25rem;
+  border-bottom: 1px solid #2d362d;
+
+  .brand-wordmark {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+
+    .brand-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: var(--color-moss);
+    }
+
+    .brand-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.01em;
+    }
+  }
+
+  .workshop-badge {
+    font-size: 0.725rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #8c998c;
+  }
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 1.25rem 0.75rem;
+
+  .nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-sm);
+    color: #b5c2b5;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      background-color: #2b332b;
+      color: #ffffff;
+    }
+
+    &.active {
+      background-color: var(--color-moss);
+      color: #ffffff;
+    }
+  }
+}
+
+.sidebar-footer {
+  padding: 1.25rem;
+  border-top: 1px solid #2d362d;
+
+  .user-profile-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .user-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+
+      .user-name {
+        font-size: 0.875rem;
+        color: #ffffff;
+      }
+
+      .user-role-badge {
+        font-size: 0.75rem;
+        color: #9eb09e;
+      }
+    }
+
+    .btn-logout {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: none;
+      border: 1px solid #3d4a3d;
+      color: #b5c2b5;
+      padding: 0.35rem 0.65rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      cursor: pointer;
+      width: fit-content;
+      transition: background-color 0.15s ease, color 0.15s ease;
+
+      &:hover {
+        background-color: #2b332b;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 2rem 2.5rem;
+  background-color: var(--bg-page);
+  min-width: 0;
+}
+
+/* Mobile topbar (hidden on desktop) */
+.mobile-topbar {
+  display: none;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .mobile-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-sidebar);
+    color: #ffffff;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #141a14;
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .brand-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: var(--color-moss);
+      }
+
+      .brand-text {
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+    }
+
+    .mobile-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .mobile-link {
+        color: #c5d2c5;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+
+        &:hover {
+          color: #ffffff;
+        }
+      }
+
+      .btn-logout-mobile {
+        background: none;
+        border: 1px solid #3d4a3d;
+        color: #c5d2c5;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+}

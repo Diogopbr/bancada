@@ -1,0 +1,327 @@
+.customer-sheet-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  min-height: 100vh;
+}
+
+.customer-container {
+  width: 100%;
+  max-width: 640px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--color-border);
+  padding: 1.75rem;
+  box-shadow: 0 4px 16px rgba(36, 41, 36, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.customer-header {
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding-bottom: 1.25rem;
+
+  .brand-line {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    color: var(--color-moss-dark);
+    margin-bottom: 0.5rem;
+
+    .brand-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-moss);
+    }
+  }
+
+  .customer-title {
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+  }
+
+  .customer-subtitle {
+    font-size: 0.875rem;
+    color: var(--color-ink-muted);
+  }
+}
+
+.order-summary-box {
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+
+  .summary-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    .order-code {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-ink);
+      background-color: #eee9dc;
+      padding: 0.15rem 0.5rem;
+      border-radius: var(--radius-sm);
+    }
+  }
+
+  .equipment-headline {
+    font-size: 1.2rem;
+    color: var(--color-ink);
+  }
+}
+
+.section-title {
+  font-size: 1.1rem;
+  color: var(--color-ink);
+  margin-bottom: 0.75rem;
+}
+
+.quote-sheet-section {
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: 1.25rem;
+
+  .quote-sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    .section-title {
+      margin-bottom: 0;
+    }
+
+    .revision-indicator {
+      font-size: 0.8rem;
+      font-weight: 600;
+      background-color: var(--color-moss-light);
+      color: var(--color-moss-dark);
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+    }
+  }
+}
+
+.quote-items-container {
+  background-color: #fdfdfc;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+
+  .customer-items-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--color-border-subtle);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .item-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+
+        .item-desc {
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: var(--color-ink);
+        }
+
+        .item-meta {
+          font-size: 0.8rem;
+          color: var(--color-ink-subtle);
+        }
+      }
+
+      .item-subtotal {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--color-ink);
+      }
+    }
+  }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--bg-surface-subtle);
+    border-top: 2px solid var(--color-border);
+
+    .total-label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--color-ink);
+    }
+
+    .total-value {
+      font-size: 1.35rem;
+      color: var(--color-accent);
+    }
+  }
+}
+
+.decision-area {
+  .decision-actions-box {
+    background-color: var(--bg-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 1.25rem;
+
+    .decision-prompt {
+      font-size: 0.875rem;
+      color: var(--color-ink);
+      margin-bottom: 1rem;
+      line-height: 1.45;
+    }
+
+    .decision-buttons {
+      display: flex;
+      gap: 0.75rem;
+
+      .btn {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+      }
+    }
+  }
+
+  .decision-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .banner-accepted {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+  }
+
+  .banner-rejected {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+  }
+}
+
+.public-timeline-section {
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: 1.25rem;
+
+  .public-timeline {
+    list-style: none;
+    position: relative;
+    padding-left: 1.25rem;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background-color: var(--color-border);
+    }
+
+    .timeline-step {
+      position: relative;
+      margin-bottom: 1rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .step-dot {
+        position: absolute;
+        left: -1.25rem;
+        top: 5px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: var(--color-moss);
+        border: 2px solid var(--bg-surface);
+      }
+
+      .step-body {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.5rem;
+
+        .step-title {
+          font-size: 0.85rem;
+          color: var(--color-ink);
+        }
+
+        .step-date {
+          font-size: 0.775rem;
+          color: var(--color-ink-subtle);
+        }
+      }
+    }
+  }
+}
+
+/* Expired state */
+.expired-state {
+  padding: 3rem 1.5rem;
+  text-align: center;
+
+  .expired-icon {
+    color: #991b1b;
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    font-size: 1.35rem;
+    margin-bottom: 0.75rem;
+  }
+
+  p {
+    font-size: 0.9rem;
+    max-width: 480px;
+    margin: 0 auto 0.75rem;
+  }
+
+  .expired-contact {
+    font-size: 0.85rem;
+    color: var(--color-ink-subtle);
+  }
+}
+
+
+
+@media (max-width: 480px) {
+  .customer-container {
+    padding: 1.25rem;
+  }
+
+  .decision-buttons {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,121 @@
+.login-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 120px);
+  padding: 1.5rem 1rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 12px rgba(36, 41, 36, 0.04);
+}
+
+.login-header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+
+  .brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.65rem;
+    background-color: var(--color-moss-light);
+    border-radius: 9999px;
+    margin-bottom: 0.75rem;
+
+    .brand-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--color-moss);
+    }
+
+    .brand-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-moss-dark);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+  }
+
+  .login-title {
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.35rem;
+  }
+
+  .login-subtitle {
+    font-size: 0.875rem;
+    color: var(--color-ink-muted);
+  }
+}
+
+.login-form {
+  margin-bottom: 1.5rem;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.demo-section {
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: 1.25rem;
+
+  .demo-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-ink-subtle);
+    margin-bottom: 0.75rem;
+    text-align: center;
+  }
+
+  .demo-pills {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .demo-pill {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0.75rem;
+    background-color: var(--bg-surface-subtle);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.1s ease, border-color 0.1s ease;
+
+    &:hover {
+      background-color: #f5f2e8;
+      border-color: var(--color-border);
+    }
+
+    .pill-role {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-moss-dark);
+    }
+
+    .pill-email {
+      font-size: 0.8rem;
+      color: var(--color-ink-muted);
+      font-family: var(--font-mono);
+    }
+  }
+
+  .demo-note {
+    font-size: 0.75rem;
+    color: var(--color-ink-subtle);
+    text-align: center;
+  }
+}
