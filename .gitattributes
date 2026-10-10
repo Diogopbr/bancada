@@ -5,3 +5,5 @@
 *.ts text eol=lf
 *.scss text eol=lf
 *.cs text eol=lf
+*.yml text eol=lf
+*.html text eol=lf

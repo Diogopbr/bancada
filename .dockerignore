@@ -2,6 +2,9 @@
 .local
 .superpowers
 .worktrees
+.vercel
+.agents
+skills-lock.json
 **/node_modules
 **/bin
 **/obj

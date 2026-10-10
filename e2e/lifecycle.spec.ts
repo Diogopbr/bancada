@@ -47,11 +47,22 @@ test('receptionist, technician and customer complete a repair in the browser', a
     const customer = await customerContext.newPage();
     await customer.goto(await access.inputValue());
     await expect(customer).toHaveURL(/\/acompanhar$/);
+    await expect(customer.getByRole('button', { name: 'Aprovar orçamento', exact: true })).toBeVisible();
+    await tech.reload();
+    await tech.getByRole('button', { name: /nova revisão de orçamento/i }).click();
+    await tech.getByPlaceholder('0.00').fill('280.00');
+    await tech.getByRole('button', { name: /publicar orçamento/i }).click();
+    await expect(tech.locator('.revision-badge')).toHaveText('Revisão #2');
+    await customer.getByRole('button', { name: 'Aprovar orçamento', exact: true }).click();
+    await customer.getByRole('button', { name: 'Sim, aprovar serviço', exact: true }).click();
+    await expect(customer.getByText(/esta versão do orçamento foi alterada ou superada/i)).toBeVisible();
+    await customer.reload();
     await customer.getByRole('button', { name: 'Aprovar orçamento', exact: true }).click();
     await customer.getByRole('button', { name: 'Sim, aprovar serviço', exact: true }).click();
     await expect(customer.getByText(/orçamento aprovado com sucesso/i)).toBeVisible();
     expect((await new AxeBuilder({ page: customer }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([]);
     expect(await customer.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await customer.screenshot({ path: 'docs/screenshots/customer-mobile.png', fullPage: true });
 
     await tech.reload();
     await tech.getByRole('button', { name: /iniciar reparo/i }).click();
@@ -63,7 +74,8 @@ test('receptionist, technician and customer complete a repair in the browser', a
     await expect(page.locator('.status-badge')).toHaveText('Entregue');
     await page.reload();
     await expect(page.locator('.status-badge')).toHaveText('Entregue');
-    await expect(page.getByRole('list', { name: /histórico de alterações/i }).getByRole('listitem')).toHaveCount(7);
+    await expect(page.getByRole('list', { name: /histórico de alterações/i }).getByRole('listitem')).toHaveCount(8);
+    await page.screenshot({ path: 'docs/screenshots/order-delivered.png', fullPage: true });
   } finally {
     await techContext.close();
     await customerContext.close();

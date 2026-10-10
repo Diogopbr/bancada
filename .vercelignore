@@ -1,0 +1,14 @@
+.git
+.local
+.superpowers
+.worktrees
+.agents
+skills-lock.json
+**/node_modules
+**/bin
+**/obj
+**/dist
+**/.angular
+.env*
+test-results
+playwright-report
