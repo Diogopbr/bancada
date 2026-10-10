@@ -18,7 +18,7 @@ Vercel para interface, conforme instrução do usuário. Avaliar Container Runti
 
 Copilot: conexão comprovada pelo relatório docs/tasks/copilot-connection-check.md e confirmação visual do usuário. Backend enviado para .worktrees/copilot, branch agent/copilot-backend.
 
-Antigravity: comando chat do IDE abriu janela sem prompt (confirmado pelo usuário). CLI oficial 1.3.3 instalado em diretório local; tentativa headless em andamento. Ainda sem relatório de conclusão.
+Antigravity: comando chat do IDE abriu janela sem prompt (confirmado pelo usuário). CLI oficial 1.3.3 autenticado e utilizado para implementar o frontend; relatório em docs/tasks/antigravity-frontend-result.md. Copilot foi mantido na janela existente do VS Code após a correção do envio inicial.
 
 ## Verificações iniciais
 
@@ -27,3 +27,19 @@ Antigravity: comando chat do IDE abriu janela sem prompt (confirmado pelo usuár
 - HTTP real: API readiness 200 e servidor Angular 200.
 - verify.ps1 passou na base atual; fluxos de negócio e E2E ainda não implementados.
 - Dependência transitiva Microsoft.OpenApi 2.0.0 teve alerta de vulnerabilidade; referência explícita 2.12.2 removeu o alerta na execução seguinte.
+
+## Produto integrado — 10/10/2026
+
+Codex repetiu os 44 testes do Copilot com PostgreSQL real, zero falhas/ignorados. Backend integrado em e8671fc. Frontend do Antigravity passou em build e 16 testes independentes e foi integrado em a8598b2.
+
+O navegador revelou falhas de redirecionamento sem sessão, CSRF após login sem recarregar, contraste e quebra de códigos no celular. Foram corrigidas. Três regressões de precisão falharam antes da correção e passaram depois: quantidade fracionada, preço com três casas e expoente são recusados sem alteração silenciosa.
+
+scripts/verify.ps1: exit code 0, backend build sem avisos/erros, 44 testes backend, 19 frontend e 5 Playwright aprovados. Percurso: abertura, diagnóstico, orçamento, link, aprovação, reparo e entrega. Revisão antiga recebe conflito e a atual pode ser aprovada. Teste adicional de duas abas mostrou 409 na segunda gravação e recuperação da avaliação persistida ao recarregar os dados.
+
+axe passou no detalhe da ordem e na projeção do cliente. Layout móvel verificado a 390×844, sem overflow horizontal. Screenshots em docs/screenshots capturados da aplicação real com dados fictícios. Não houve ensaio de carga.
+
+## Hospedagem — ainda sem deploy
+
+Vercel autenticada, projeto bancada criado e Neon Free provisionado em gru1 após aceite dos termos pelo usuário. ConnectionStrings__Bancada foi cadastrada como segredo por stdin, com TLS VerifyFull. Valores não foram registrados no Git. Modo demo e porta 8080 configurados. Isolamento da demo e funcionamento hospedado seguem pendentes de integração/verificação.
+
+Ainda não houve push, criação do repositório público, execução de CI remoto ou publicação no LinkedIn.

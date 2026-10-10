@@ -29,10 +29,20 @@ test('receptionist, technician and customer complete a repair in the browser', a
     const tech = await techContext.newPage();
     await signIn(tech, 'tecnico1@bancada.example');
     await tech.goto(orderUrl);
+    const staleTab = await techContext.newPage();
+    await staleTab.goto(orderUrl);
+    await staleTab.getByRole('button', { name: /registrar diagnóstico/i }).click();
+    await staleTab.getByLabel(/descrição do diagnóstico/i).fill('Nota antiga que não deve substituir a avaliação atual.');
     await tech.getByRole('button', { name: /registrar diagnóstico/i }).click();
     await tech.getByLabel(/descrição do diagnóstico/i).fill('Falha na fonte confirmada. Troca da peça e teste de carga.');
     await tech.getByRole('button', { name: /salvar diagnóstico/i }).click();
     await expect(tech.locator('.status-badge')).toHaveText('Em diagnóstico');
+    await staleTab.getByRole('button', { name: /salvar diagnóstico/i }).click();
+    await expect(staleTab.getByText(/conflito de versão \(409\)/i)).toBeVisible();
+    await staleTab.getByRole('button', { name: /recarregar dados agora/i }).click();
+    await expect(staleTab.getByLabel(/descrição do diagnóstico/i)).toHaveValue(/Falha na fonte confirmada/);
+    await expect(staleTab.getByLabel(/descrição do diagnóstico/i)).not.toHaveValue(/Nota antiga/);
+    await staleTab.close();
     await tech.getByRole('button', { name: /publicar orçamento/i }).click();
     await tech.getByPlaceholder('Peça ou serviço...').fill('Reparo e teste da fonte');
     await tech.getByPlaceholder('0.00').fill('275.50');
@@ -62,7 +72,9 @@ test('receptionist, technician and customer complete a repair in the browser', a
     await expect(customer.getByText(/orçamento aprovado com sucesso/i)).toBeVisible();
     expect((await new AxeBuilder({ page: customer }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([]);
     expect(await customer.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    await customer.screenshot({ path: 'docs/screenshots/customer-mobile.png', fullPage: true });
+    if (process.env['BANCADA_CAPTURE_SCREENSHOTS']) {
+      await customer.screenshot({ path: 'docs/screenshots/customer-mobile.png', fullPage: true });
+    }
 
     await tech.reload();
     await tech.getByRole('button', { name: /iniciar reparo/i }).click();
@@ -75,7 +87,9 @@ test('receptionist, technician and customer complete a repair in the browser', a
     await page.reload();
     await expect(page.locator('.status-badge')).toHaveText('Entregue');
     await expect(page.getByRole('list', { name: /histórico de alterações/i }).getByRole('listitem')).toHaveCount(8);
-    await page.screenshot({ path: 'docs/screenshots/order-delivered.png', fullPage: true });
+    if (process.env['BANCADA_CAPTURE_SCREENSHOTS']) {
+      await page.screenshot({ path: 'docs/screenshots/order-delivered.png', fullPage: true });
+    }
   } finally {
     await techContext.close();
     await customerContext.close();
