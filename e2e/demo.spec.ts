@@ -3,8 +3,19 @@ import AxeBuilder from '@axe-core/playwright';
 
 test('visitors have private data, role controls and a keyboard usable reset', async ({ page, browser }) => {
   await page.goto('/entrar');
+  const baseURL = new URL(page.url()).origin;
   await page.getByTestId('start-demo-button').click();
   await expect(page).toHaveURL(/\/ordens$/);
+  if (baseURL.startsWith('https:')) {
+    const cookies = await page.context().cookies();
+    for (const name of ['bancada.staff', 'bancada.demo']) {
+      const cookie = cookies.find(c => c.name === name);
+      expect(cookie).toBeDefined();
+      expect(cookie?.secure).toBe(true);
+      expect(cookie?.httpOnly).toBe(true);
+      expect(cookie?.sameSite).toBe('Strict');
+    }
+  }
   const initial = await (await page.request.get('/api/orders')).json();
   expect(initial.total).toBe(5);
   await page.getByRole('complementary').getByRole('link', { name: 'Nova ordem', exact: true }).click();
@@ -26,14 +37,14 @@ test('visitors have private data, role controls and a keyboard usable reset', as
   await customer.goto(await access.inputValue());
   await expect(customer.getByRole('button', { name: 'Aprovar orçamento', exact: true })).toBeVisible();
   await page.goto(privateOrderUrl);
-  const independent = await browser.newContext({ baseURL: 'http://localhost:5092' });
+  const independent = await browser.newContext({ baseURL });
   try {
     const other = await independent.newPage();
-    await other.goto('http://localhost:5092/entrar');
+    await other.goto('/entrar');
     await other.getByTestId('start-demo-button').click();
     await expect(other).toHaveURL(/\/ordens$/);
     expect((await (await other.request.get('/api/orders')).json()).total).toBe(5);
-    expect((await other.request.get(privateOrderUrl.replace('http://localhost:5092/ordens/', '/api/orders/'))).status()).toBe(404);
+    expect((await other.request.get(new URL(privateOrderUrl).pathname.replace('/ordens/', '/api/orders/'))).status()).toBe(404);
     await expect(other.getByText(equipment, { exact: true })).toHaveCount(0);
     await page.getByTestId('demo-role-select').selectOption('technician1');
     await expect(page.getByTestId('demo-role-select')).toBeEnabled();
@@ -41,10 +52,19 @@ test('visitors have private data, role controls and a keyboard usable reset', as
     await customer.getByRole('button', { name: 'Aprovar orçamento', exact: true }).click();
     await customer.getByRole('button', { name: 'Sim, aprovar serviço', exact: true }).click();
     await expect(customer.getByText(/orçamento aprovado com sucesso/i)).toBeVisible();
+    await page.goto(`/ordens/${pending.id}`);
+    await page.getByRole('button', { name: /iniciar reparo/i }).click();
+    await expect(page.locator('.status-badge')).toHaveText('Em reparo');
+    await page.getByRole('button', { name: /concluir reparo/i }).click();
+    await expect(page.locator('.status-badge')).toHaveText('Pronta para retirada');
     await page.reload();
     await expect(page.getByTestId('demo-role-select')).toHaveValue('technician1');
     await page.getByTestId('demo-role-select').selectOption('receptionist');
     await expect(page.getByTestId('demo-role-select')).toBeEnabled();
+    await page.getByRole('button', { name: /confirmar entrega ao cliente/i }).click();
+    await expect(page.locator('.status-badge')).toHaveText('Entregue');
+    await customer.reload();
+    await expect(customer.getByText('Equipamento entregue. Atendimento concluído.', { exact: true })).toBeVisible();
     await page.goto('/ordens');
     await expect(page.getByRole('table').getByText(equipment, { exact: true })).toBeVisible();
     const opener = page.getByRole('button', { name: 'Reiniciar demonstração', exact: true });
