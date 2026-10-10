@@ -4,6 +4,8 @@ Operação de assistência técnica: recebimento, diagnóstico, orçamento, apro
 
 Projeto de portfólio de Diogo Pereira. Os atendimentos são fictícios. O fluxo completo está implementado e foi verificado localmente. [Experimente a demonstração](https://bancada-seven.vercel.app) — cada visitante recebe seus próprios dados fictícios.
 
+![Entrada da demonstração do Bancada](docs/screenshots/entry-desktop.png)
+
 ![Ordem entregue e histórico de atendimento](docs/screenshots/order-delivered.png)
 
 ## O problema

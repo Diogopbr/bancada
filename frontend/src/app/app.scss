@@ -14,18 +14,18 @@
 
 /* Sidebar */
 .sidebar {
-  width: 250px;
+  width: 216px;
   background-color: var(--bg-sidebar);
   color: #e5ebe5;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  border-right: 1px solid #141a14;
+  border-right: 1px solid #152121;
 }
 
 .sidebar-header {
   padding: 1.5rem 1.25rem 1.25rem;
-  border-bottom: 1px solid #2d362d;
+  border-bottom: 1px solid #344747;
 
   .brand-wordmark {
     display: flex;
@@ -41,7 +41,8 @@
     }
 
     .brand-name {
-      font-size: 1.25rem;
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 2.25rem;
       font-weight: 700;
       color: #ffffff;
       letter-spacing: -0.01em;
@@ -52,7 +53,7 @@
     font-size: 0.725rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #8c998c;
+    color: #b1c3c3;
   }
 }
 
@@ -75,14 +76,14 @@
     gap: 0.75rem;
     padding: 0.65rem 0.85rem;
     border-radius: var(--radius-sm);
-    color: #b5c2b5;
+    color: #c7d4d4;
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 500;
     transition: background-color 0.15s ease, color 0.15s ease;
 
     &:hover {
-      background-color: #2b332b;
+      background-color: #2b3e3e;
       color: #ffffff;
     }
 
@@ -95,7 +96,7 @@
 
 .sidebar-footer {
   padding: 1.25rem;
-  border-top: 1px solid #2d362d;
+  border-top: 1px solid #344747;
 
   .user-profile-box {
     display: flex;
@@ -124,7 +125,7 @@
       gap: 0.4rem;
       background: none;
       border: 1px solid #3d4a3d;
-      color: #b5c2b5;
+      color: #c7d4d4;
       padding: 0.35rem 0.65rem;
       border-radius: var(--radius-sm);
       font-size: 0.8rem;
@@ -133,7 +134,7 @@
       transition: background-color 0.15s ease, color 0.15s ease;
 
       &:hover {
-        background-color: #2b332b;
+        background-color: #2b3e3e;
         color: #ffffff;
       }
     }
@@ -173,7 +174,7 @@
     background-color: var(--bg-sidebar);
     color: #ffffff;
     padding: 0.85rem 1rem;
-    border-bottom: 1px solid #141a14;
+    border-bottom: 1px solid #152121;
 
     .brand-group {
       display: flex;
@@ -200,7 +201,7 @@
       gap: 0.75rem;
 
       .mobile-link {
-        color: #c5d2c5;
+        color: #c5d2d2;
         text-decoration: none;
         font-size: 0.85rem;
         font-weight: 500;
@@ -213,7 +214,7 @@
       .btn-logout-mobile {
         background: none;
         border: 1px solid #3d4a3d;
-        color: #c5d2c5;
+        color: #c5d2d2;
         padding: 0.25rem 0.5rem;
         border-radius: var(--radius-sm);
         font-size: 0.8rem;
@@ -229,10 +230,10 @@
 
 /* Demo Strip */
 .demo-strip {
-  background-color: #f2ede2;
+  background-color: transparent;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 0.65rem 1rem;
+  padding: 0.65rem 0;
   margin-bottom: 1.5rem;
   display: flex;
   justify-content: space-between;
@@ -253,7 +254,7 @@
       letter-spacing: 0.04em;
       color: var(--color-moss-dark);
       background-color: var(--color-moss-light);
-      border: 1px solid #d5e0d5;
+      border: 0;
       padding: 0.15rem 0.5rem;
       border-radius: var(--radius-sm);
     }

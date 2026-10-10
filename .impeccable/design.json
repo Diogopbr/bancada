@@ -1,0 +1,237 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-10T23:56:49.0275622Z",
+  "title": "Design System: Bancada",
+  "extensions": {
+    "shadows": [
+      {
+        "purpose": "Separacao do modal sobre backdrop.",
+        "name": "modal",
+        "value": "0 10px 25px rgba(0, 0, 0, 0.15)"
+      }
+    ],
+    "colorMeta": {
+      "page": {
+        "displayName": "page",
+        "rampPurpose": "Exploracao visual sintetizada; nao e escala aplicada no codigo.",
+        "role": "neutral"
+      },
+      "surface": {
+        "displayName": "surface",
+        "rampPurpose": "Exploracao visual sintetizada; nao e escala aplicada no codigo.",
+        "role": "neutral"
+      },
+      "surface-subtle": {
+        "displayName": "surface-subtle",
+        "rampPurpose": "Exploracao visual sintetizada; nao e escala aplicada no codigo.",
+        "role": "neutral"
+      },
+      "sidebar": {
+        "displayName": "sidebar",
+        "rampPurpose": "Exploracao visual sintetizada; nao e escala aplicada no codigo.",
+        "role": "neutral"
+      },
+      "ink": {
+        "displayName": "ink",
+        "rampPurpose": "Exploracao visual sintetizada; nao e escala aplicada no codigo.",
+        "role": "neutral"
+      },
+      "ink-muted": {
+        "displayName": "ink-muted",
+        "rampPurpose": "Exploracao visual sintetizada; nao e escala aplicada no codigo.",
+        "role": "neutral"
+      },
+      "border": {
+        "displayName": "border",
+        "rampPurpose": "Exploracao visual sintetizada; nao e escala aplicada no codigo.",
+        "role": "neutral"
+      },
+      "border-subtle": {
+        "displayName": "border-subtle",
+        "rampPurpose": "Exploracao visual sintetizada; nao e escala aplicada no codigo.",
+        "role": "neutral"
+      },
+      "primary": {
+        "displayName": "primary",
+        "rampPurpose": "Exploracao visual sintetizada; nao e escala aplicada no codigo.",
+        "role": "primary"
+      },
+      "primary-hover": {
+        "displayName": "primary-hover",
+        "rampPurpose": "Exploracao visual sintetizada; nao e escala aplicada no codigo.",
+        "role": "primary"
+      },
+      "primary-subtle": {
+        "displayName": "primary-subtle",
+        "rampPurpose": "Exploracao visual sintetizada; nao e escala aplicada no codigo.",
+        "role": "primary"
+      },
+      "accent": {
+        "displayName": "accent",
+        "rampPurpose": "Exploracao visual sintetizada; nao e escala aplicada no codigo.",
+        "role": "primary"
+      },
+      "accent-hover": {
+        "displayName": "accent-hover",
+        "rampPurpose": "Exploracao visual sintetizada; nao e escala aplicada no codigo.",
+        "role": "primary"
+      },
+      "accent-subtle": {
+        "displayName": "accent-subtle",
+        "rampPurpose": "Exploracao visual sintetizada; nao e escala aplicada no codigo.",
+        "role": "primary"
+      }
+    },
+    "motion": [
+      {
+        "purpose": "Cor e borda de controles.",
+        "name": "state-transition",
+        "value": "150ms ease"
+      },
+      {
+        "purpose": "Reduzir animacoes e transicoes quando solicitado pelo sistema.",
+        "name": "reduced-motion",
+        "value": "0.01ms"
+      }
+    ],
+    "breakpoints": [
+      {
+        "value": "480px",
+        "name": "customer-small"
+      },
+      {
+        "value": "600px",
+        "name": "quote-small"
+      },
+      {
+        "value": "640px",
+        "name": "sheet-padding"
+      },
+      {
+        "value": "760px",
+        "name": "entry-stack"
+      },
+      {
+        "value": "768px",
+        "name": "mobile-navigation"
+      },
+      {
+        "value": "900px",
+        "name": "detail-stack"
+      }
+    ],
+    "typographyMeta": {
+      "title": {
+        "displayName": "Titulo de secao",
+        "purpose": "Organizacao da ficha."
+      },
+      "headline": {
+        "displayName": "Titulo de trabalho",
+        "purpose": "Identificacao da fila."
+      },
+      "body": {
+        "displayName": "Leitura",
+        "purpose": "Conteudo e formularios."
+      },
+      "display": {
+        "displayName": "Mensagem de entrada",
+        "purpose": "Apresentacao da oficina."
+      }
+    }
+  },
+  "components": [
+    {
+      "kind": "button",
+      "html": "<button class=\"ds-button-primary\">Salvar</button>",
+      "description": "Acao com texto e estado de foco.",
+      "name": "Botao primary",
+      "css": ".ds-button-primary{background:var(--color-moss);color:#ffffff;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:.5rem 1rem;font-family:var(--font-sans);font-size:.9rem;cursor:pointer;transition:background-color .15s ease}.ds-button-{background:var(--color-moss-dark)}.ds-button-primary:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px;}",
+      "refersTo": "button-primary"
+    },
+    {
+      "kind": "button",
+      "html": "<button class=\"ds-button-accent\">Salvar</button>",
+      "description": "Acao com texto e estado de foco.",
+      "name": "Botao accent",
+      "css": ".ds-button-accent{background:var(--color-accent);color:#ffffff;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:.5rem 1rem;font-family:var(--font-sans);font-size:.9rem;cursor:pointer;transition:background-color .15s ease}.ds-button-{background:var(--color-accent-hover)}.ds-button-accent:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px;}",
+      "refersTo": "button-accent"
+    },
+    {
+      "kind": "button",
+      "html": "<button class=\"ds-button-secondary\">Salvar</button>",
+      "description": "Acao com texto e estado de foco.",
+      "name": "Botao secondary",
+      "css": ".ds-button-secondary{background:var(--bg-surface);color:var(--color-ink);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:.5rem 1rem;font-family:var(--font-sans);font-size:.9rem;cursor:pointer;transition:background-color .15s ease}.ds-button-{background:var(--bg-surface-subtle)}.ds-button-secondary:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px;}",
+      "refersTo": "button-secondary"
+    },
+    {
+      "kind": "input",
+      "html": "<label class=\"ds-field\">Equipamento<input class=\"ds-input\" placeholder=\"Notebook\" /></label>",
+      "description": "Campo rotulado de leitura.",
+      "name": "Campo",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:.35rem;font-family:var(--font-sans);color:var(--color-ink)}.ds-input{background:var(--bg-surface);color:var(--color-ink);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:.5rem .75rem;font-family:var(--font-sans);font-size:.9rem}.ds-input:focus{border-color:var(--color-moss)}.ds-input:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px;}",
+      "refersTo": "input"
+    },
+    {
+      "kind": "nav",
+      "css": ".ds-nav{background:var(--bg-sidebar);padding:.75rem;font-family:var(--font-sans)}.ds-nav-link{display:block;padding:.65rem .85rem;color:#ffffff;background:var(--color-moss);border-radius:var(--radius-sm);text-decoration:none;font-size:.9rem}.ds-nav-link:hover{background:#2b3e3e}.ds-nav-link:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px;}",
+      "name": "Navegacao",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link\" href=\"#ordens\" aria-current=\"page\">Ordens de serviço</a></nav>",
+      "description": "Link de trabalho no plano grafite."
+    },
+    {
+      "kind": "card",
+      "html": "<section class=\"ds-panel\"><h2 class=\"ds-panel-title\">Diagnóstico</h2><p>Informação da ordem de serviço.</p></section>",
+      "description": "Superficie de apoio delimitada por borda.",
+      "name": "Painel",
+      "css": ".ds-panel{background:var(--bg-surface);color:var(--color-ink);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:1.25rem;font-family:var(--font-sans)}.ds-panel-title{font-family:\"Barlow Condensed\",sans-serif;font-size:1.6rem;line-height:1.25;margin:0 0 1rem}",
+      "refersTo": "panel"
+    },
+    {
+      "kind": "chip",
+      "css": ".ds-status{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .6rem;border-radius:2px;font-family:var(--font-sans);font-size:.775rem;font-weight:600;color:var(--status-received-text);background:var(--status-received-bg)}.ds-status:before{content:\"\";width:6px;height:6px;border-radius:50%;background:var(--status-received-text)}",
+      "name": "Status",
+      "html": "<span class=\"ds-status\">Recebido</span>",
+      "description": "Estado recebido com texto e ponto."
+    }
+  ],
+  "narrative": {
+    "northStar": "Ficha de serviço e instrumento de oficina",
+    "rules": [
+      {
+        "body": "Use o laranja para ação ou informação decisiva; não transforme cada seção em um bloco de destaque.",
+        "section": "colors",
+        "name": "The Sinal de Ação Rule"
+      },
+      {
+        "body": "Reserve a condensada para títulos e identidade; não transfira descrições longas para a fonte de display.",
+        "section": "typography",
+        "name": "The Tipo com Função Rule"
+      },
+      {
+        "body": "Separe seções relacionadas com linhas e espaço; não repita cartões idênticos para cada par de rótulo e valor.",
+        "section": "elevation",
+        "name": "The Ficha Contínua Rule"
+      }
+    ],
+    "overview": "Uma interface operacional firme, com superfícies frias, leitura direta e ações identificáveis. O caráter vem da tipografia condensada, da organização do trabalho e do contraste entre grafite e laranja escuro. A metáfora orienta a informação; não reproduz papel envelhecido, instrumentos físicos ou textura artificial.\n\nA direção e a execução code-first foram escolhidas por Codex dentro da autonomia delegada pelo usuário em 10/10/2026, após a rejeição do visual genérico. Não houve concept roll, seed, mock aprovado ou quality-bar card separado. A referência de qualidade adotada foi leitura longa na oficina, hierarquia dos dados e ações, navegação por teclado e uso no celular. Nenhuma escolha estética pessoal é atribuída ao usuário.",
+    "dos": [
+      "Do preservar fonte local, hierarquia de títulos e números tabulares.",
+      "Do usar linhas e agrupamento para tornar a ficha contínua.",
+      "Do manter rótulos, foco visível e ações disponíveis sem hover.",
+      "Do respeitar prefers-reduced-motion nas transições e animações."
+    ],
+    "donts": [
+      "Don't inventar textura física, métricas, clientes ou resultados para decorar a interface.",
+      "Don't transformar rótulos operacionais em chamadas decorativas acima dos títulos.",
+      "Don't promover cores herdadas de status a novos acentos de marca.",
+      "Don't reintroduzir cartões iguais em cada seção da ficha."
+    ],
+    "keyCharacteristics": [
+      "Superfícies claras frias e navegação em grafite.",
+      "Títulos condensados, texto de leitura em Barlow e códigos monoespaçados.",
+      "Seções contínuas de ficha, separadas por linhas.",
+      "Ações, orçamento e estados reais preservados na hierarquia."
+    ]
+  }
+}

@@ -16,7 +16,7 @@ test('receptionist, technician and customer complete a repair in the browser', a
   await page.getByRole('complementary').getByRole('link', { name: 'Nova ordem', exact: true }).click();
   await page.getByLabel(/nome completo do cliente/i).fill('Cliente fictício do percurso');
   await page.getByLabel(/email de contato/i).fill('journey@example.test');
-  await page.getByLabel(/equipamento \(marca/i).fill(`Console de teste ${Date.now()}`);
+  await page.getByLabel(/equipamento \(marca/i).fill('Console Sony PlayStation 4 (fictício)');
   await page.getByLabel(/problema relatado pelo cliente/i).fill('Equipamento desliga durante o uso.');
   await page.getByLabel(/técnico responsável pelo diagnóstico/i).selectOption({ label: 'Tecnico Um' });
   await page.getByRole('button', { name: /abrir ordem de serviço/i }).click();

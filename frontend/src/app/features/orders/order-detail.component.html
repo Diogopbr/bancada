@@ -39,7 +39,7 @@
     <header class="order-header panel">
       <div class="header-main">
         <div class="code-title-group">
-          <span class="order-code code-font">{{ o.code }}</span>
+          <h1 class="order-code code-font">{{ o.code }}</h1>
           <span class="status-badge status-{{ o.status }}">{{ getStatusLabel(o.status) }}</span>
           <span class="version-tag">versão {{ o.version }}</span>
         </div>
@@ -335,6 +335,8 @@
                   </span>
                 </div>
 
+                <p class="quote-scroll-hint">Deslize a tabela para consultar todos os valores.</p>
+                <div class="quote-table-scroll" role="region" aria-label="Itens do orçamento" tabindex="0">
                 <table class="quote-display-table">
                   <thead>
                     <tr>
@@ -369,6 +371,7 @@
                     </tr>
                   </tfoot>
                 </table>
+                </div>
               </div>
             } @else {
               <div class="empty-field-notice">

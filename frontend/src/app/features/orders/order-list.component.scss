@@ -13,7 +13,7 @@
 
   .title-area {
     .page-title {
-      font-size: 1.625rem;
+      font-size: 2.65rem;
       letter-spacing: -0.02em;
       margin-bottom: 0.25rem;
     }
@@ -190,7 +190,7 @@
   font-weight: 600;
   color: var(--color-ink);
   font-size: 0.85rem;
-  background-color: #eee9dc;
+  background-color: var(--bg-surface-subtle);
   padding: 0.15rem 0.45rem;
   border-radius: var(--radius-sm);
 }
@@ -270,6 +270,7 @@
     flex-direction: column;
     align-items: stretch;
 
+    .search-box { flex: none; }
     .filter-item {
       width: 100%;
     }

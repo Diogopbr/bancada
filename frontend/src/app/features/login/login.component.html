@@ -1,4 +1,14 @@
 <div class="login-wrapper">
+  <section class="login-intro" aria-label="Sobre o Bancada">
+    <div class="intro-wordmark">Bancada<span aria-hidden="true">.</span></div>
+    <div class="intro-copy">
+      <h2>Todo reparo tem<br>uma história.<br>Registre a sua.</h2>
+      <p>Ordens de serviço para assistência técnica. Do equipamento recebido à entrega, com diagnóstico, orçamento e aprovação do cliente no mesmo lugar.</p>
+    </div>
+    <ol class="service-route" aria-label="Etapas do serviço">
+      <li><span>01</span> Receber</li><li><span>02</span> Diagnosticar</li><li><span>03</span> Orçar</li><li><span>04</span> Reparar</li>
+    </ol>
+  </section>
   <div class="login-card panel">
     <header class="login-header">
       <div class="brand-badge">
@@ -6,7 +16,7 @@
         <span class="brand-name">Bancada</span>
       </div>
       <h1 class="login-title">Acesso à Oficina</h1>
-      <p class="login-subtitle">Entre com as credenciais da equipe ou inicie a demonstração guiada</p>
+      <p class="login-subtitle">Abra a bancada e acompanhe uma ordem de serviço.</p>
     </header>
 
     @if (errorMessage()) {
@@ -23,7 +33,7 @@
         </div>
         <h2 class="demo-card-title">Demonstração Privada</h2>
         <p class="demo-card-desc">
-          Ambiente isolado com dados fictícios descartáveis (até 20 ordens de serviço por visitante, validade de 24h). Não requer senha compartilhada nem expõe informações reais da oficina.
+          Explore dados fictícios em uma oficina só sua. Alterne entre atendente e técnicos, crie um orçamento e teste a aprovação do cliente. Seu ambiente dura 24h e permite até 20 ordens.
         </p>
         <button
           type="button"
