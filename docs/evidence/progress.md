@@ -51,3 +51,14 @@ Verificação local completa de 10/10/2026: scripts/verify.ps1 terminou com cód
 Revisão independente identificou quatro regressões, corrigidas e reavaliadas: versão local após revogar link; decisão sobre acesso expirado; respostas de busca fora de ordem; drenagem de workspaces vencidos. Três testes frontend falharam antes das correções e passaram depois. O teste PostgreSQL confirmou que um host remove os lotes restantes; transações mantêm limite de dez workspaces, com continuação após um segundo enquanto houver lote cheio.
 
 A tentativa de executar comandos de teste pelo Antigravity CLI foi negada por sua política de comandos. Codex executou build e testes independentemente; esse limite está registrado em docs/tasks/antigravity-demo-result.md. A implementação externa foi integrada somente após essa validação.
+
+## Publicação verificada — 10/10/2026
+
+- Repositório público: https://github.com/Diogopbr/bancada.
+- Demonstração pública: https://bancada-seven.vercel.app.
+- CI: https://github.com/Diogopbr/bancada/actions/runs/38061163453, status completed/success para 3e2e1b4.
+- Vercel: dpl_HbxTH9dxAxuPAcANmrj1WVgqXViU, READY, região gru1 confirmada pela API. Neon Free em gru1, migrations explícitas aplicadas e readiness 200 com PostgreSQL.
+- Playwright hospedado passou com dois visitantes: criação persistida, dados estrangeiros 404, cookies staff/demo Secure/HttpOnly/SameSite Strict, perfil após reload, cliente em outra aba, aprovação, reparo, entrega, estado do cliente atualizado, reset com teclado e invalidação do acesso antigo. axe não encontrou violações das regras executadas na fila. O teste não substitui uma auditoria completa de acessibilidade.
+- A primeira publicação em iad1 mostrou latência repetida de aproximadamente 117 ms por consulta ao banco em gru1. Aplicação movida para gru1; o percurso ampliado terminou em 17,1 s. Trata-se de observação de uma execução, não de benchmark ou ensaio de carga.
+
+Publicação no LinkedIn ainda não executada. Rascunho preparado em docs/launch/linkedin.md para uso quando o autor decidir o calendário da coleção.

@@ -2,7 +2,7 @@
 
 Operação de assistência técnica: recebimento, diagnóstico, orçamento, aprovação do cliente, reparo e entrega.
 
-Projeto de portfólio de Diogo Pereira. Os atendimentos são fictícios. O fluxo completo está implementado e foi verificado localmente. A demonstração pública está em preparação.
+Projeto de portfólio de Diogo Pereira. Os atendimentos são fictícios. O fluxo completo está implementado e foi verificado localmente. [Experimente a demonstração](https://bancada-seven.vercel.app) — cada visitante recebe seus próprios dados fictícios.
 
 ![Ordem entregue e histórico de atendimento](docs/screenshots/order-delivered.png)
 
@@ -58,7 +58,7 @@ Interface: `http://localhost:4200`. API: `http://localhost:5080/health/ready`. A
 
 Execute `./scripts/dev.ps1 -Stop` para encerrar os processos desta sessão antes de recompilar a API no Windows. Execute `./scripts/verify.ps1` para build e testes locais. Os testes de integração criam bancos PostgreSQL exclusivos; não são ignorados se o banco estiver indisponível. Playwright inicia API e Angular e percorre o atendimento sem interceptar a API.
 
-Execução local de 10/10/2026: **65 testes backend, 36 frontend e 6 de navegador aprovados**, build backend sem avisos e build Angular válido. O percurso inclui três sessões separadas, persistência após recarregar, revisão superada, conflito entre abas e verificações automatizadas de acessibilidade e layout móvel. CI e hospedagem ainda aguardam execução.
+Execução local de 10/10/2026: **65 testes backend, 36 frontend e 6 de navegador aprovados**, build backend sem avisos e build Angular válido. O percurso inclui três sessões separadas, persistência após recarregar, revisão superada, conflito entre abas e verificações automatizadas de acessibilidade e layout móvel. A mesma suíte passou no [GitHub Actions](https://github.com/Diogopbr/bancada/actions/runs/38061163453). O percurso da demo também passou na Vercel com banco Neon: criação, isolamento, aprovação, reparo, entrega e reset.
 
 ## Documentação
 
@@ -70,4 +70,4 @@ Execução local de 10/10/2026: **65 testes backend, 36 frontend e 6 de navegado
 - [Concorrência](docs/decisions/concurrency.md)
 - [Evidência de execução](docs/evidence/progress.md)
 
-Publicação planejada na Vercel com Neon Free. A demo oferece cinco atendimentos fictícios por visitante, alternância entre atendente e dois técnicos, reinício e limite de vinte ordens. Os dados são isolados por visitante e expiram em 24 horas. O isolamento, a troca de perfil entre abas e o reset foram verificados no navegador usando o pacote compilado de Angular e .NET; o funcionamento hospedado será verificado antes de anunciar a demonstração. Sem pagamentos reais, estoque, emissão fiscal, anexos ou envio de email/WhatsApp nesta versão.
+Publicação planejada na Vercel com Neon Free. A demo oferece cinco atendimentos fictícios por visitante, alternância entre atendente e dois técnicos, reinício e limite de vinte ordens. Os dados são isolados por visitante e expiram em 24 horas. O isolamento, a troca de perfil entre abas e o reset foram verificados no navegador usando o pacote compilado de Angular e .NET; o funcionamento hospedado passou em 10/10/2026. Sem pagamentos reais, estoque, emissão fiscal, anexos ou envio de email/WhatsApp nesta versão.
