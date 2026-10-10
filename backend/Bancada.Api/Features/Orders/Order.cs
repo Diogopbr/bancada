@@ -9,6 +9,7 @@ public sealed class Order
     public static readonly string[] Statuses =
         ["received", "diagnosing", "awaitingApproval", "approved", "repairing", "ready", "delivered", "cancelled"];
     public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid? WorkspaceId { get; set; }
     public string Code { get; set; } = "";
     public string CustomerName { get; set; } = "";
     public string CustomerEmail { get; set; } = "";

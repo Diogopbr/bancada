@@ -5,11 +5,13 @@ namespace Bancada.Api.Features.Orders;
 
 public sealed class OrderStore(BancadaDb db)
 {
-    public async Task<Order> LoadAsync(Guid id, bool locked = false)
+    public async Task<Order> LoadAsync(Guid id, bool locked = false, bool customer = false)
     {
+        if (locked && !customer) await DemoResetService.LockWorkspaceAsync(db, db.CurrentWorkspaceId);
         var query = locked
             ? db.Orders.FromSqlInterpolated($"SELECT * FROM \"Orders\" WHERE \"Id\" = {id} FOR UPDATE")
             : db.Orders.Where(o => o.Id == id);
+        if (customer) query = query.IgnoreQueryFilters();
         var order = await query.SingleOrDefaultAsync() ?? throw new ApiError(404);
         await db.Entry(order).Collection(o => o.History).LoadAsync();
         await db.Entry(order).Collection(o => o.Quotes).Query().Include(q => q.Items).LoadAsync();

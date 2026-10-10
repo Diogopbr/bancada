@@ -15,6 +15,8 @@ public static class OrderEndpoints
         var group = app.MapGroup("/api/orders").RequireAuthorization("staff");
         group.MapPost("", async (CreateOrderRequest request, BancadaDb db, UserManager<StaffUser> users, ClaimsPrincipal principal) =>
         {
+            await using var transaction = await db.Database.BeginTransactionAsync();
+            await DemoResetService.LockWorkspaceAsync(db, db.CurrentWorkspaceId);
             Validation.Text(request.CustomerName, 1, 120);
             Validation.Text(request.EquipmentLabel, 1, 120);
             Validation.Text(request.ReportedIssue, 1, 2000);
@@ -22,10 +24,14 @@ public static class OrderEndpoints
             if (string.IsNullOrWhiteSpace(request.CustomerEmail) || request.CustomerEmail.Length > 254
                 || !new EmailAddressAttribute().IsValid(request.CustomerEmail)) throw new ApiError(400);
             var technician = await users.FindByIdAsync(request.TechnicianId ?? "");
-            if (technician is null || !await users.IsInRoleAsync(technician, "technician")) throw new ApiError(400);
+            if (technician is null || technician.WorkspaceId != db.CurrentWorkspaceId
+                || !await users.IsInRoleAsync(technician, "technician")) throw new ApiError(400);
             var actor = await users.GetUserAsync(principal) ?? throw new ApiError(401);
+            if (db.CurrentWorkspaceId is not null && await db.Orders.CountAsync() >= 20)
+                throw new ApiError(409, "A demonstracao permite no maximo 20 ordens, incluindo exemplos.");
             var order = new Order
             {
+                WorkspaceId = db.CurrentWorkspaceId,
                 CustomerName = request.CustomerName.Trim(), CustomerEmail = request.CustomerEmail.Trim(),
                 EquipmentLabel = request.EquipmentLabel.Trim(), EquipmentSerial = request.EquipmentSerial?.Trim() ?? "",
                 ReportedIssue = request.ReportedIssue.Trim(), TechnicianId = technician.Id, TechnicianName = technician.DisplayName
@@ -38,6 +44,7 @@ public static class OrderEndpoints
             });
             db.Orders.Add(order);
             await db.SaveChangesAsync();
+            await transaction.CommitAsync();
             return Results.Created($"/api/orders/{order.Id}", OrderProjection.Detail(order));
         }).RequireAuthorization("receptionist");
         group.MapGet("", async (HttpRequest request, BancadaDb db, UserManager<StaffUser> users) =>
@@ -54,7 +61,8 @@ public static class OrderEndpoints
             if (technician.Length > 0)
             {
                 var user = await users.FindByIdAsync(technician);
-                if (user is null || !await users.IsInRoleAsync(user, "technician")) throw new ApiError(400);
+                if (user is null || user.WorkspaceId != db.CurrentWorkspaceId
+                    || !await users.IsInRoleAsync(user, "technician")) throw new ApiError(400);
             }
             var query = db.Orders.AsNoTracking();
             if (search.Length > 0) query = query.Where(o => o.Code.Contains(search) || o.EquipmentLabel.Contains(search)

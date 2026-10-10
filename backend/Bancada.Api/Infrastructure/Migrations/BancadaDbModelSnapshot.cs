@@ -17,7 +17,7 @@ namespace Bancada.Api.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.6")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -50,6 +50,41 @@ namespace Bancada.Api.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("CustomerAccesses");
+                });
+
+            modelBuilder.Entity("Bancada.Api.Features.Access.DemoVisitor", b =>
+                {
+                    b.Property<string>("TokenHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid?>("WorkspaceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("TokenHash");
+
+                    b.HasIndex("WorkspaceId");
+
+                    b.ToTable("DemoVisitors");
+                });
+
+            modelBuilder.Entity("Bancada.Api.Features.Access.DemoWorkspace", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("Revoked")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.ToTable("DemoWorkspaces");
                 });
 
             modelBuilder.Entity("Bancada.Api.Features.Access.StaffSession", b =>
@@ -85,6 +120,9 @@ namespace Bancada.Api.Infrastructure.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DemoRole")
                         .HasColumnType("text");
 
                     b.Property<string>("DisplayName")
@@ -131,6 +169,9 @@ namespace Bancada.Api.Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<Guid?>("WorkspaceId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
@@ -139,6 +180,8 @@ namespace Bancada.Api.Infrastructure.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("WorkspaceId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -227,12 +270,17 @@ namespace Bancada.Api.Infrastructure.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("WorkspaceId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
                         .IsUnique();
 
                     b.HasIndex("TechnicianId");
+
+                    b.HasIndex("WorkspaceId");
 
                     b.ToTable("Orders");
                 });
@@ -299,6 +347,25 @@ namespace Bancada.Api.Infrastructure.Migrations
                     b.HasIndex("QuoteId");
 
                     b.ToTable("QuoteItem");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FriendlyName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Xml")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DataProtectionKeys");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -442,6 +509,14 @@ namespace Bancada.Api.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Bancada.Api.Features.Access.DemoVisitor", b =>
+                {
+                    b.HasOne("Bancada.Api.Features.Access.DemoWorkspace", null)
+                        .WithMany()
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
             modelBuilder.Entity("Bancada.Api.Features.Access.StaffSession", b =>
                 {
                     b.HasOne("Bancada.Api.Features.Access.StaffUser", null)
@@ -449,6 +524,13 @@ namespace Bancada.Api.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Bancada.Api.Features.Access.StaffUser", b =>
+                {
+                    b.HasOne("Bancada.Api.Features.Access.DemoWorkspace", null)
+                        .WithMany()
+                        .HasForeignKey("WorkspaceId");
                 });
 
             modelBuilder.Entity("Bancada.Api.Features.History.OrderEvent", b =>
@@ -467,6 +549,10 @@ namespace Bancada.Api.Infrastructure.Migrations
                         .HasForeignKey("TechnicianId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Bancada.Api.Features.Access.DemoWorkspace", null)
+                        .WithMany()
+                        .HasForeignKey("WorkspaceId");
                 });
 
             modelBuilder.Entity("Bancada.Api.Features.Quotes.Quote", b =>

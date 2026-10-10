@@ -4,11 +4,17 @@ using Microsoft.EntityFrameworkCore;
 using Bancada.Api.Features.Orders;
 using Bancada.Api.Features.History;
 using Bancada.Api.Features.Quotes;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
 namespace Bancada.Api.Infrastructure;
 
-public sealed class BancadaDb(DbContextOptions<BancadaDb> options) : IdentityDbContext<StaffUser>(options)
+public sealed class BancadaDb(DbContextOptions<BancadaDb> options, IHttpContextAccessor http) :
+    IdentityDbContext<StaffUser>(options), IDataProtectionKeyContext
 {
+    public Guid? CurrentWorkspaceId => Guid.TryParse(http.HttpContext?.User.FindFirst("workspaceId")?.Value, out var id) ? id : null;
+    public DbSet<DemoWorkspace> DemoWorkspaces => Set<DemoWorkspace>();
+    public DbSet<DemoVisitor> DemoVisitors => Set<DemoVisitor>();
+    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderEvent> OrderEvents => Set<OrderEvent>();
     public DbSet<Quote> Quotes => Set<Quote>();
@@ -18,8 +24,19 @@ public sealed class BancadaDb(DbContextOptions<BancadaDb> options) : IdentityDbC
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.Entity<DemoWorkspace>().HasIndex(w => w.ExpiresAt);
+        builder.Entity<DemoVisitor>(visitor =>
+        {
+            visitor.HasKey(v => v.TokenHash);
+            visitor.Property(v => v.TokenHash).HasMaxLength(64);
+            visitor.HasOne<DemoWorkspace>().WithMany().HasForeignKey(v => v.WorkspaceId).OnDelete(DeleteBehavior.SetNull);
+        });
+        builder.Entity<StaffUser>().HasOne<DemoWorkspace>().WithMany().HasForeignKey(u => u.WorkspaceId);
         builder.Entity<Order>(order =>
         {
+            order.HasOne<DemoWorkspace>().WithMany().HasForeignKey(o => o.WorkspaceId);
+            order.HasQueryFilter(o => o.WorkspaceId == CurrentWorkspaceId
+                && (o.WorkspaceId == null || DemoWorkspaces.Any(w => w.Id == o.WorkspaceId && !w.Revoked && w.ExpiresAt > DateTimeOffset.UtcNow)));
             order.Property(o => o.Version).IsConcurrencyToken();
             order.HasIndex(o => o.Code).IsUnique();
             order.HasOne<StaffUser>().WithMany().HasForeignKey(o => o.TechnicianId).OnDelete(DeleteBehavior.Restrict);

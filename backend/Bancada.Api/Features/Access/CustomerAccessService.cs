@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bancada.Api.Features.Access;
 
-public sealed class CustomerAccessService(BancadaDb db, OrderStore store)
+public sealed class CustomerAccessService(BancadaDb db, OrderStore store, IConfiguration configuration, IHttpContextAccessor http)
 {
     public const string Scheme = "customer";
 
@@ -24,7 +24,23 @@ public sealed class CustomerAccessService(BancadaDb db, OrderStore store)
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         var locator = await db.CustomerAccesses.AsNoTracking().SingleOrDefaultAsync(a => a.Id == accessId, cancellationToken)
             ?? throw new ApiError(404);
-        var order = await store.LoadAsync(locator.OrderId, true);
+        var workspace = await db.Orders.IgnoreQueryFilters().AsNoTracking()
+            .Where(o => o.Id == locator.OrderId).Select(o => new { o.WorkspaceId }).SingleOrDefaultAsync(cancellationToken)
+            ?? throw new ApiError(404);
+        if (configuration.GetValue<bool>("BANCADA_DEMO_MODE") != (workspace.WorkspaceId is not null))
+            throw new ApiError(404);
+        if (db.CurrentWorkspaceId is not null && db.CurrentWorkspaceId != workspace.WorkspaceId)
+            throw new ApiError(404);
+        var visitorToken = http.HttpContext?.Request.Cookies[DemoResetService.CookieName];
+        if (workspace.WorkspaceId is not null && visitorToken?.Length == 43)
+        {
+            var visitorHash = CustomerAccess.Hash(visitorToken);
+            var visitorWorkspace = await db.DemoVisitors.AsNoTracking().Where(v => v.TokenHash == visitorHash)
+                .Select(v => v.WorkspaceId).SingleOrDefaultAsync(cancellationToken);
+            if (visitorWorkspace is not null && visitorWorkspace != workspace.WorkspaceId) throw new ApiError(404);
+        }
+        await DemoResetService.LockWorkspaceAsync(db, workspace.WorkspaceId, 404);
+        var order = await store.LoadAsync(locator.OrderId, true, customer: true);
         // Grant changes and decisions share the order lock, including the post-lock validity check.
         var access = await db.CustomerAccesses.AsNoTracking().SingleOrDefaultAsync(a => a.Id == accessId, cancellationToken);
         if (access is null || access.Revoked || access.ExpiresAt <= DateTimeOffset.UtcNow) throw new ApiError(404);

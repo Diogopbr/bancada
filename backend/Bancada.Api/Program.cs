@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +19,13 @@ builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(opt
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<BancadaDb>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Bancada")));
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddDataProtection().SetApplicationName("Bancada").PersistKeysToDbContext<BancadaDb>();
+builder.Services.Configure<ForwardedHeadersOptions>(options => ProductionHosting.ConfigureForwarding(options, builder.Configuration));
+builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
+builder.Services.AddScoped<DemoResetService>();
+builder.Services.AddSingleton<DemoCleanupService>();
+builder.Services.AddHostedService(services => services.GetRequiredService<DemoCleanupService>());
 builder.Services.AddScoped<OrderStore>();
 builder.Services.AddScoped<CustomerAccessService>();
 builder.Services.AddScoped<CustomerDecisionService>();
@@ -32,6 +41,9 @@ builder.Services.Configure<SecurityStampValidatorOptions>(options =>
         var session = context.CurrentPrincipal?.FindFirst("staffSessionId");
         if (session is not null && context.NewPrincipal?.Identity is System.Security.Claims.ClaimsIdentity identity)
             identity.AddClaim(session);
+        var workspace = context.CurrentPrincipal?.FindFirst("workspaceId");
+        if (workspace is not null && context.NewPrincipal?.Identity is System.Security.Claims.ClaimsIdentity refreshed)
+            refreshed.AddClaim(workspace);
         return Task.CompletedTask;
     };
 });
@@ -73,7 +85,7 @@ builder.Services.AddAntiforgery(options =>
 builder.Services.AddRateLimiter(options =>
 {
     options.OnRejected = (context, _) => new ValueTask(ApiError.Result(429).ExecuteAsync(context.HttpContext));
-    foreach (var name in new[] { "login", "customer" })
+    foreach (var name in new[] { "login", "customer", "demo" })
         options.AddPolicy(name, context => RateLimitPartition.GetFixedWindowLimiter(
             context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             _ => new FixedWindowRateLimiterOptions { PermitLimit = 20, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
@@ -85,6 +97,12 @@ if (args.Contains("--bootstrap"))
     return;
 }
 app.UseExceptionHandler();
+app.UseForwardedHeaders();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
 app.Use(async (http, next) =>
 {
     try { await next(); }
@@ -97,6 +115,14 @@ app.UseStatusCodePages(async context =>
     if (status is 400 or 401 or 403 or 404 or 405 or 429)
         await ApiError.Result(status == 405 ? 400 : status).ExecuteAsync(context.HttpContext);
 });
+app.Use(async (http, next) =>
+{
+    if (http.Request.Path.StartsWithSegments("/api"))
+        await http.RequestServices.GetRequiredService<DemoCleanupService>().CleanupIfDueAsync(http.RequestAborted);
+    await next();
+});
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
@@ -118,6 +144,8 @@ app.MapStaff();
 app.MapOrders();
 app.MapQuotes();
 app.MapCustomer();
+app.MapDemo();
+app.MapSpa();
 app.MapOpenApi();
 app.MapGet("/health/ready", async (IConfiguration configuration, CancellationToken cancellationToken) =>
 {

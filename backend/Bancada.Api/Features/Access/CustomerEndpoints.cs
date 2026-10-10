@@ -23,9 +23,12 @@ public static class CustomerEndpoints
             await db.CustomerAccesses.Where(a => a.OrderId == id && !a.Revoked)
                 .ExecuteUpdateAsync(update => update.SetProperty(a => a.Revoked, true));
             var token = CustomerAccess.Token();
+            var expiresAt = db.CurrentWorkspaceId is Guid workspaceId
+                ? await db.DemoWorkspaces.Where(w => w.Id == workspaceId).Select(w => w.ExpiresAt).SingleAsync()
+                : BusinessTime.UtcNow.AddDays(7);
             var access = new CustomerAccess
             {
-                OrderId = id, TokenHash = CustomerAccess.Hash(token), ExpiresAt = BusinessTime.UtcNow.AddDays(7)
+                OrderId = id, TokenHash = CustomerAccess.Hash(token), ExpiresAt = expiresAt
             };
             db.CustomerAccesses.Add(access);
             order.Version++;

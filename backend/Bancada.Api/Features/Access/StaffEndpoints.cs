@@ -18,13 +18,15 @@ public static class StaffEndpoints
             var user = await users.GetUserAsync(principal);
             return user is null ? ApiError.Result(401) : Results.Ok(await Session(user, users));
         }).RequireAuthorization("staff");
-        app.MapPost("/api/login", async (LoginRequest request, UserManager<StaffUser> users, SignInManager<StaffUser> signIn) =>
+        app.MapPost("/api/login", async (LoginRequest request, UserManager<StaffUser> users, SignInManager<StaffUser> signIn,
+            IConfiguration configuration) =>
         {
+            if (configuration.GetValue<bool>("BANCADA_DEMO_MODE")) return ApiError.Result(401);
             if (string.IsNullOrWhiteSpace(request.Email) || !new EmailAddressAttribute().IsValid(request.Email)
                 || string.IsNullOrEmpty(request.Password) || request.Password.Length > 1024)
                 return ApiError.Result(400);
             var user = await users.FindByEmailAsync(request.Email);
-            if (user is null) return ApiError.Result(401);
+            if (user is null || user.WorkspaceId is not null) return ApiError.Result(401);
             var result = await signIn.PasswordSignInAsync(user, request.Password, false, true);
             return result.Succeeded ? Results.Ok(await Session(user, users)) : ApiError.Result(401);
         }).RequireRateLimiting("login");
@@ -33,12 +35,15 @@ public static class StaffEndpoints
             await signIn.SignOutAsync();
             return Results.NoContent();
         }).RequireAuthorization("staff");
-        app.MapGet("/api/technicians", async (UserManager<StaffUser> users) =>
-            Results.Ok((await users.GetUsersInRoleAsync("technician"))
-                .OrderBy(u => u.DisplayName).Select(u => new { u.Id, u.DisplayName }))).RequireAuthorization("staff");
+        app.MapGet("/api/technicians", async (Bancada.Api.Infrastructure.BancadaDb db) =>
+            Results.Ok(await db.Users.Where(u => u.WorkspaceId == db.CurrentWorkspaceId
+                && db.UserRoles.Any(ur => ur.UserId == u.Id
+                    && db.Roles.Any(r => r.Id == ur.RoleId && r.NormalizedName == "TECHNICIAN")))
+                .OrderBy(u => u.DisplayName).Select(u => new { u.Id, u.DisplayName }).ToListAsync()))
+            .RequireAuthorization("staff");
     }
 
-    private static async Task<object> Session(StaffUser user, UserManager<StaffUser> users) =>
+    internal static async Task<object> Session(StaffUser user, UserManager<StaffUser> users) =>
         new { user.Id, user.DisplayName, role = await users.IsInRoleAsync(user, "receptionist") ? "receptionist" : "technician" };
 }
 

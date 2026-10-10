@@ -21,6 +21,7 @@ public sealed class ApiFixture : IAsyncLifetime
     public WebApplicationFactory<Program> Factory { get; private set; } = null!;
     public string Connection { get; private set; } = "";
     public TestLogs Logs { get; } = new();
+    public bool Seed { get; init; } = true;
 
     public async Task InitializeAsync()
     {
@@ -38,7 +39,7 @@ public sealed class ApiFixture : IAsyncLifetime
             await using var schema = new NpgsqlCommand("SELECT to_regclass('\"AspNetUsers\"') IS NULL", isolated);
             Assert.Equal(true, await schema.ExecuteScalarAsync());
         }
-        await Bootstrap.RunAsync(Factory.Services, true);
+        await Bootstrap.RunAsync(Factory.Services, Seed);
     }
 
     public async Task DisposeAsync()
@@ -76,19 +77,26 @@ public sealed class ApiFixture : IAsyncLifetime
     }
 }
 
-internal sealed class ApiFactory(string connection, string environment = "Development", TestLogs? logs = null) : WebApplicationFactory<Program>
+internal sealed class ApiFactory(string connection, string environment = "Development", TestLogs? logs = null,
+    bool demo = false, string? webRoot = null, string? trustedProxy = null) : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment(environment);
+        if (webRoot is not null) builder.UseWebRoot(webRoot);
         builder.ConfigureServices(services => services.AddTransient<IStartupFilter, TestIpFilter>());
         if (logs is not null) builder.ConfigureLogging(logging => logging.AddProvider(logs));
-        builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(
-            new Dictionary<string, string?>
+        builder.ConfigureAppConfiguration((_, configuration) =>
+        {
+            var settings = new Dictionary<string, string?>
             {
                 ["ConnectionStrings:Bancada"] = connection,
-                ["BANCADA_DEMO_PASSWORD"] = ApiFixture.Password
-            }));
+                ["BANCADA_DEMO_PASSWORD"] = ApiFixture.Password,
+                ["BANCADA_DEMO_MODE"] = demo.ToString()
+            };
+            if (trustedProxy is not null) settings["Hosting:TrustedProxies:0"] = trustedProxy;
+            configuration.AddInMemoryCollection(settings);
+        });
     }
 
 }
@@ -119,6 +127,8 @@ internal sealed class TestIpFilter : IStartupFilter
             var key = http.Request.Cookies["bancada.csrf"] ?? Guid.NewGuid().ToString();
             http.Connection.RemoteIpAddress = clients.GetOrAdd(key,
                 _ => new IPAddress(new byte[] { 10, 0, (byte)(Volatile.Read(ref nextIp) / 250), (byte)(Interlocked.Increment(ref nextIp) % 250 + 1) }));
+            if (http.Request.Headers.ContainsKey("X-Forwarded-Proto"))
+                http.Connection.RemoteIpAddress = IPAddress.Parse("10.0.0.1");
             await continuation();
         });
         next(app);

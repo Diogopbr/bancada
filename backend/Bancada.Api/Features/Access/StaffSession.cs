@@ -32,8 +32,17 @@ public static class StaffSessionEvents
     {
         await SecurityStampValidator.ValidatePrincipalAsync(context);
         var db = context.HttpContext.RequestServices.GetRequiredService<BancadaDb>();
+        var userId = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+        var workspaceClaim = context.Principal?.FindFirstValue("workspaceId");
+        var demo = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>().GetValue<bool>("BANCADA_DEMO_MODE");
+        var workspaceId = Guid.TryParse(workspaceClaim, out var parsed) ? parsed : (Guid?)null;
         if (!Guid.TryParse(context.Principal?.FindFirstValue("staffSessionId"), out var id)
-            || !await db.StaffSessions.AsNoTracking().AnyAsync(s => s.Id == id && !s.Revoked && s.ExpiresAt > DateTimeOffset.UtcNow))
+            || !await db.StaffSessions.AsNoTracking().AnyAsync(s => s.Id == id && s.UserId == userId
+                && !s.Revoked && s.ExpiresAt > DateTimeOffset.UtcNow)
+            || (demo && workspaceId is null) || (!demo && workspaceId is not null)
+            || !await db.Users.AnyAsync(u => u.Id == userId && u.WorkspaceId == workspaceId)
+            || (workspaceId is not null && !await db.DemoWorkspaces.AnyAsync(w =>
+                w.Id == workspaceId && !w.Revoked && w.ExpiresAt > DateTimeOffset.UtcNow)))
             context.RejectPrincipal();
     }
 
