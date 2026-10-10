@@ -121,4 +121,18 @@ describe('OrderDetailComponent', () => {
 
     expect(comp.conflictMessage()).toContain('Conflito de versão (409)');
   });
+
+  it.each([
+    { quantity: 1, unitPrice: '1.999' },
+    { quantity: 1.5, unitPrice: '10.00' },
+    { quantity: 1, unitPrice: '1e2' },
+  ])('rejects imprecise input without rounding or truncating it: %j', async (input) => {
+    fixture.componentInstance.order.set(sampleOrder);
+    mockApiClient.publishQuote = vi.fn().mockResolvedValue(sampleOrder);
+    const alert = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    fixture.componentInstance.quoteItems.set([{ description: 'Peça fictícia', kind: 'part', ...input }]);
+    await fixture.componentInstance.publishQuote();
+    expect(mockApiClient.publishQuote).not.toHaveBeenCalled();
+    alert.mockRestore();
+  });
 });

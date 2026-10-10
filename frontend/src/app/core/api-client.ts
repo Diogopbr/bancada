@@ -65,12 +65,14 @@ export class ApiClient {
 
   public async login(credentials: { email: string; password: string }): Promise<SessionInfo> {
     const headers = await this.getWriteHeaders();
-    return firstValueFrom(
+    const session = await firstValueFrom(
       this.http.post<SessionInfo>(`${this.baseUrl}/login`, credentials, {
         headers,
         withCredentials: true,
       })
     );
+    this.csrfToken = null;
+    return session;
   }
 
   public async logout(): Promise<void> {

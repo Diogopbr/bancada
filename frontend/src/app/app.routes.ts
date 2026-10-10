@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { staffGuard } from './core/staff.guard';
 
 export const routes: Routes = [
   {
@@ -13,16 +14,19 @@ export const routes: Routes = [
   },
   {
     path: 'ordens',
+    canActivate: [staffGuard],
     loadComponent: () =>
       import('./features/orders/order-list.component').then((m) => m.OrderListComponent),
   },
   {
     path: 'ordens/nova',
+    canActivate: [staffGuard],
     loadComponent: () =>
       import('./features/orders/order-create.component').then((m) => m.OrderCreateComponent),
   },
   {
     path: 'ordens/:id',
+    canActivate: [staffGuard],
     loadComponent: () =>
       import('./features/orders/order-detail.component').then((m) => m.OrderDetailComponent),
   },

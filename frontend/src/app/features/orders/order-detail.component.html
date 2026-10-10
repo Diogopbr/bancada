@@ -285,6 +285,9 @@
               </div>
 
               <div class="quote-edit-controls">
+                @if (quoteValidation()) {
+                  <p class="form-error" role="alert">{{ quoteValidation() }}</p>
+                }
                 <button
                   type="button"
                   class="btn btn-secondary btn-sm"

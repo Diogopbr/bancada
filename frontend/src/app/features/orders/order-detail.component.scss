@@ -1,5 +1,7 @@
 .order-detail-workspace {
   max-width: 1200px;
+  min-width: 0;
+  overflow-wrap: anywhere;
   margin: 0 auto;
 }
 
@@ -31,6 +33,8 @@
   gap: 1rem;
 
   .header-main {
+    min-width: 0;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
@@ -43,6 +47,8 @@
     flex-wrap: wrap;
 
     .order-code {
+      max-width: 100%;
+      overflow-wrap: anywhere;
       font-size: 1.5rem;
       font-weight: 700;
       color: var(--color-ink);
@@ -79,6 +85,7 @@
 }
 
 .main-column, .sidebar-column {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;

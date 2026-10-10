@@ -47,6 +47,7 @@ export class OrderDetailComponent implements OnInit {
   public readonly isEditingQuote = signal<boolean>(false);
   public readonly quoteItems = signal<FormQuoteItem[]>([]);
   public readonly isPublishingQuote = signal<boolean>(false);
+  public readonly quoteValidation = signal('');
 
   // Customer access link
   public readonly customerAccess = signal<CustomerAccessResponse | null>(null);
@@ -211,20 +212,20 @@ export class OrderDetailComponent implements OnInit {
     const o = this.order();
     const items = this.quoteItems();
     if (!o || items.length === 0) return;
+    this.quoteValidation.set('');
 
     // Validação local
     for (const item of items) {
       if (!item.description.trim()) {
-        alert('Todos os itens do orçamento precisam ter uma descrição.');
+        this.quoteValidation.set('Todos os itens do orçamento precisam ter uma descrição.');
         return;
       }
-      if (item.quantity < 1 || item.quantity > 999) {
-        alert('A quantidade dos itens deve ser entre 1 e 999.');
+      if (!Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 999) {
+        this.quoteValidation.set('A quantidade deve ser um número inteiro entre 1 e 999.');
         return;
       }
-      const price = parseFloat(item.unitPrice);
-      if (isNaN(price) || price < 0) {
-        alert('Informe um preço unitário válido com valor não negativo.');
+      if (!/^\d{1,6}(\.\d{1,2})?$/.test(item.unitPrice)) {
+        this.quoteValidation.set('Informe o preço com ponto decimal e até duas casas, entre 0 e 999999.99.');
         return;
       }
     }
@@ -235,8 +236,8 @@ export class OrderDetailComponent implements OnInit {
     const payloadItems: QuoteItem[] = items.map((i) => ({
       description: i.description.trim(),
       kind: i.kind,
-      quantity: Math.floor(i.quantity),
-      unitPrice: Number(i.unitPrice).toFixed(2),
+      quantity: i.quantity,
+      unitPrice: i.unitPrice,
     }));
 
     try {
@@ -319,6 +320,7 @@ export class OrderDetailComponent implements OnInit {
     try {
       const res = await this.api.createCustomerAccess(o.id, o.version);
       this.customerAccess.set(res);
+      this.order.set(await this.api.getOrder(o.id));
       this.copyFeedback.set('');
     } catch (err: any) {
       this.handleActionError(err);

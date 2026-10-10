@@ -9,7 +9,7 @@ test('staff signs in and registers a persisted order through the interface', asy
   await page.getByLabel(/senha/i).fill(password);
   await page.getByRole('button', { name: /entrar/i }).click();
   await expect(page).toHaveURL(/\/ordens$/);
-  await page.goto('/ordens/nova');
+  await page.getByRole('complementary').getByRole('link', { name: 'Nova ordem', exact: true }).click();
   const equipment = `Notebook fictício UI ${Date.now()}`;
   await page.getByLabel(/nome completo do cliente/i).fill('Cliente fictício do teste');
   await page.getByLabel(/email de contato/i).fill('ui-client@example.test');
