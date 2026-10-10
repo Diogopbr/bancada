@@ -177,4 +177,15 @@ describe('OrderDetailComponent', () => {
     expect(fixture.componentInstance.showCancelModal()).toBe(false);
     expect(document.activeElement).toBe(cancelTrigger);
   });
+  it('refreshes the order version after revoking customer access', async () => {
+    fixture = TestBed.createComponent(OrderDetailComponent);
+    const component = fixture.componentInstance;
+    component.order.set(sampleOrder);
+    mockApiClient.revokeCustomerAccess = vi.fn().mockResolvedValue(undefined);
+    mockApiClient.getOrder = vi.fn().mockResolvedValue({ ...sampleOrder, version: 4 });
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    await component.revokeCustomerAccess();
+    expect(component.order()?.version).toBe(4);
+    vi.restoreAllMocks();
+  });
 });

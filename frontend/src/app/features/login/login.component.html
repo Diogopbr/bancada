@@ -39,12 +39,10 @@
           }
         </button>
 
-        <div class="demo-divider">
-          <span>ou acesse com credenciais de equipe</span>
-        </div>
       </section>
     }
 
+    @if (!sessionService.isDemoEnabled()) {
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate class="login-form">
       <div class="form-group">
         <label for="email" class="form-label">Email corporativo</label>
@@ -124,5 +122,6 @@
       </div>
       <p class="demo-note">A senha corresponde à variável BANCADA_DEMO_PASSWORD configurada no ambiente.</p>
     </footer>
+    }
   </div>
 </div>

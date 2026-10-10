@@ -145,6 +145,11 @@ export class CustomerViewComponent implements OnInit {
         this.conflictMessage.set(
           'Esta versão do orçamento foi alterada ou superada pela oficina. Recarregue a página para visualizar a revisão mais recente.'
         );
+      } else if (err.status === 404) {
+        this.isExpired.set(true);
+        this.pendingDecision.set(null);
+        this.order.set(null);
+        this.successMessage.set('');
       } else {
         const problem = ApiClient.extractProblem(err);
         alert(problem?.detail || 'Erro ao processar sua resposta. Tente novamente.');

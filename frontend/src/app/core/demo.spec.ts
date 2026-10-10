@@ -40,11 +40,14 @@ describe('Demo API and State Management', () => {
     api.setCsrfToken('cached-csrf-1');
 
     const startPromise = api.startDemo();
+    httpMock.expectOne('/api/csrf').flush({ token: 'fresh-csrf' });
+    await Promise.resolve();
+    await Promise.resolve();
     await Promise.resolve();
 
     const startReq = httpMock.expectOne('/api/demo/start');
     expect(startReq.request.method).toBe('POST');
-    expect(startReq.request.headers.get('X-CSRF-TOKEN')).toBe('cached-csrf-1');
+    expect(startReq.request.headers.get('X-CSRF-TOKEN')).toBe('fresh-csrf');
 
     const demoSession: SessionInfo = {
       id: 'demo-user-1',
@@ -62,12 +65,15 @@ describe('Demo API and State Management', () => {
     api.setCsrfToken('cached-csrf-2');
 
     const switchPromise = api.switchDemoRole('technician1');
+    httpMock.expectOne('/api/csrf').flush({ token: 'fresh-csrf' });
+    await Promise.resolve();
+    await Promise.resolve();
     await Promise.resolve();
 
     const switchReq = httpMock.expectOne('/api/demo/role');
     expect(switchReq.request.method).toBe('POST');
     expect(switchReq.request.body).toEqual({ role: 'technician1' });
-    expect(switchReq.request.headers.get('X-CSRF-TOKEN')).toBe('cached-csrf-2');
+    expect(switchReq.request.headers.get('X-CSRF-TOKEN')).toBe('fresh-csrf');
 
     const techSession: SessionInfo = {
       id: 'tech-demo-1',
@@ -85,11 +91,14 @@ describe('Demo API and State Management', () => {
     api.setCsrfToken('cached-csrf-3');
 
     const resetPromise = api.resetDemo();
+    httpMock.expectOne('/api/csrf').flush({ token: 'fresh-csrf' });
+    await Promise.resolve();
+    await Promise.resolve();
     await Promise.resolve();
 
     const resetReq = httpMock.expectOne('/api/demo/reset');
     expect(resetReq.request.method).toBe('POST');
-    expect(resetReq.request.headers.get('X-CSRF-TOKEN')).toBe('cached-csrf-3');
+    expect(resetReq.request.headers.get('X-CSRF-TOKEN')).toBe('fresh-csrf');
 
     const resetSession: SessionInfo = {
       id: 'receptionist-reset',

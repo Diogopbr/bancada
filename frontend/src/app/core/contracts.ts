@@ -10,6 +10,7 @@ export interface SessionInfo {
   id: string;
   displayName: string;
   role: StaffRole;
+  demoRole?: DemoRole | null;
 }
 
 export interface TechnicianSummary {

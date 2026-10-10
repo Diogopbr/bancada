@@ -43,3 +43,11 @@ axe passou no detalhe da ordem e na projeção do cliente. Layout móvel verific
 Vercel autenticada, projeto bancada criado e Neon Free provisionado em gru1 após aceite dos termos pelo usuário. ConnectionStrings__Bancada foi cadastrada como segredo por stdin, com TLS VerifyFull. Valores não foram registrados no Git. Modo demo e porta 8080 configurados. Isolamento da demo e funcionamento hospedado seguem pendentes de integração/verificação.
 
 Ainda não houve push, criação do repositório público, execução de CI remoto ou publicação no LinkedIn.
+
+## Demo privada e revisão independente
+
+Verificação local completa de 10/10/2026: scripts/verify.ps1 terminou com código 0, 65 testes PostgreSQL/backend, 36 testes frontend, cinco cenários de navegador normais e um cenário da demo no artefato compilado de Angular e .NET. Build backend sem avisos/erros. O teste da demo usa dois visitantes, consulta estrangeira retornando 404, cinco exemplos, troca de perfil persistida após recarregar, aprovação do cliente em outra aba, reset com teclado, invalidação do acesso antigo e preservação do outro visitante.
+
+Revisão independente identificou quatro regressões, corrigidas e reavaliadas: versão local após revogar link; decisão sobre acesso expirado; respostas de busca fora de ordem; drenagem de workspaces vencidos. Três testes frontend falharam antes das correções e passaram depois. O teste PostgreSQL confirmou que um host remove os lotes restantes; transações mantêm limite de dez workspaces, com continuação após um segundo enquanto houver lote cheio.
+
+A tentativa de executar comandos de teste pelo Antigravity CLI foi negada por sua política de comandos. Codex executou build e testes independentemente; esse limite está registrado em docs/tasks/antigravity-demo-result.md. A implementação externa foi integrada somente após essa validação.

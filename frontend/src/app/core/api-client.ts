@@ -45,14 +45,9 @@ export class ApiClient {
   }
 
   private async getWriteHeaders(): Promise<HttpHeaders> {
-    if (!this.csrfToken) {
-      await this.getCsrf();
-    }
-    let headers = new HttpHeaders();
-    if (this.csrfToken) {
-      headers = headers.set('X-CSRF-TOKEN', this.csrfToken);
-    }
-    return headers;
+    // Another tab may have changed the staff identity since the previous write.
+    const token = await this.getCsrf();
+    return new HttpHeaders().set('X-CSRF-TOKEN', token);
   }
 
   // --- Session Endpoints ---

@@ -44,7 +44,7 @@ public static class StaffEndpoints
     }
 
     internal static async Task<object> Session(StaffUser user, UserManager<StaffUser> users) =>
-        new { user.Id, user.DisplayName, role = await users.IsInRoleAsync(user, "receptionist") ? "receptionist" : "technician" };
+        new { user.Id, user.DisplayName, role = await users.IsInRoleAsync(user, "receptionist") ? "receptionist" : "technician", demoRole = user.DemoRole };
 }
 
 public sealed record LoginRequest(string Email, string Password);

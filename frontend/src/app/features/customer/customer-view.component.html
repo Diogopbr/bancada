@@ -105,7 +105,16 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
-                <span>Orçamento aprovado. Reparo em andamento pela equipe técnica.</span>
+                <span>
+                  @switch (o.status) {
+                    @case ('approved') { Orçamento aprovado. Aguardando início do reparo. }
+                    @case ('repairing') { Reparo em andamento pela equipe técnica. }
+                    @case ('ready') { Reparo concluído. Equipamento pronto para retirada. }
+                    @case ('delivered') { Equipamento entregue. Atendimento concluído. }
+                    @case ('cancelled') { Orçamento aprovado anteriormente. Atendimento cancelado. }
+                    @default { Orçamento aprovado. }
+                  }
+                </span>
               </div>
             } @else if (q.decision === 'rejected') {
               <div class="decision-banner banner-rejected">

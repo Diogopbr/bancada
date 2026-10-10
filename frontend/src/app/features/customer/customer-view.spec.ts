@@ -160,4 +160,17 @@ describe('CustomerViewComponent', () => {
     expect(fixture.componentInstance.pendingDecision()).toBeNull();
     expect(document.activeElement).toBe(acceptBtn);
   });
+  it('removes stale approval controls when access expires during a decision', async () => {
+    fixture = TestBed.createComponent(CustomerViewComponent);
+    const component = fixture.componentInstance;
+    component.order.set(sampleProjection);
+    component.openDecisionConfirm('accepted');
+    mockApiClient.submitCustomerDecision = vi.fn().mockRejectedValue({ status: 404 });
+    vi.spyOn(window, 'alert').mockImplementation(() => {});
+    await component.confirmDecision();
+    expect(component.isExpired()).toBe(true);
+    expect(component.pendingDecision()).toBeNull();
+    expect(component.order()).toBeNull();
+    vi.restoreAllMocks();
+  });
 });

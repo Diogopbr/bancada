@@ -95,4 +95,22 @@ describe('OrderListComponent', () => {
     expect(retryBtn).toBeTruthy();
     expect(retryBtn?.textContent).toContain('Tentar novamente');
   });
+  it('keeps the newest filter results when earlier requests finish later', async () => {
+    let finishOld!: (value: OrdersListResponse) => void;
+    let finishNew!: (value: OrdersListResponse) => void;
+    mockApiClient.getOrders = vi.fn()
+      .mockImplementationOnce(() => new Promise(resolve => { finishOld = resolve; }))
+      .mockImplementationOnce(() => new Promise(resolve => { finishNew = resolve; }));
+    fixture = TestBed.createComponent(OrderListComponent);
+    const component = fixture.componentInstance;
+    component.searchQuery.set('no');
+    const oldRequest = component.loadOrders();
+    component.searchQuery.set('notebook');
+    const newRequest = component.loadOrders();
+    finishNew({ items: [], total: 1, page: 1, pageSize: 20 });
+    await newRequest;
+    finishOld({ items: [], total: 9, page: 1, pageSize: 20 });
+    await oldRequest;
+    expect(component.total()).toBe(1);
+  });
 });

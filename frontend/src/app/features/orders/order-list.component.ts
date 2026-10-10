@@ -22,6 +22,7 @@ export class OrderListComponent implements OnInit {
   private readonly api = inject(ApiClient);
   public readonly sessionService = inject(SessionService);
   private readonly router = inject(Router);
+  private latestRequest = 0;
 
   public readonly orders = signal<OrderSummary[]>([]);
   public readonly total = signal<number>(0);
@@ -86,6 +87,7 @@ export class OrderListComponent implements OnInit {
   }
 
   public async loadOrders(): Promise<void> {
+    const request = ++this.latestRequest;
     this.isLoading.set(true);
     this.hasError.set(false);
     this.errorMessage.set('');
@@ -98,9 +100,11 @@ export class OrderListComponent implements OnInit {
         page: this.page(),
         pageSize: this.pageSize(),
       });
+      if (request !== this.latestRequest) return;
       this.orders.set(res.items || []);
       this.total.set(res.total || 0);
     } catch (err: any) {
+      if (request !== this.latestRequest) return;
       this.hasError.set(true);
       const problem = ApiClient.extractProblem(err);
       this.errorMessage.set(
@@ -108,7 +112,7 @@ export class OrderListComponent implements OnInit {
           'Não foi possível carregar as ordens de serviço. Verifique a conexão com o servidor.'
       );
     } finally {
-      this.isLoading.set(false);
+      if (request === this.latestRequest) this.isLoading.set(false);
     }
   }
 

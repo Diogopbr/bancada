@@ -49,6 +49,12 @@ jobs:
         env:
           ASPNETCORE_ENVIRONMENT: Development
       - run: npm run test:e2e
+      - name: Publish the combined Angular and ASP.NET Core artifact
+        run: |
+          dotnet publish backend/Bancada.Api -c Release -o .local/publish
+          mkdir -p .local/publish/wwwroot
+          cp -R frontend/dist/bancada-web/browser/. .local/publish/wwwroot/
+      - run: npm run test:demo
       - run: git diff --check
       - uses: actions/upload-artifact@v4
         if: failure()

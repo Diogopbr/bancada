@@ -7,6 +7,7 @@ import { DemoRole, SessionInfo, StaffRole } from './contracts';
 })
 export class SessionService {
   private readonly api = inject(ApiClient);
+  public refreshRoutes = false;
 
   public readonly session = signal<SessionInfo | null>(null);
   public readonly isLoading = signal<boolean>(false);
@@ -25,6 +26,7 @@ export class SessionService {
     try {
       const info = await this.api.getSession();
       this.session.set(info);
+      this.currentDemoRole.set(info.demoRole ?? (info.role === 'receptionist' ? 'receptionist' : 'technician1'));
       return info;
     } catch {
       this.session.set(null);

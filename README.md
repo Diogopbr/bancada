@@ -58,7 +58,7 @@ Interface: `http://localhost:4200`. API: `http://localhost:5080/health/ready`. A
 
 Execute `./scripts/dev.ps1 -Stop` para encerrar os processos desta sessão antes de recompilar a API no Windows. Execute `./scripts/verify.ps1` para build e testes locais. Os testes de integração criam bancos PostgreSQL exclusivos; não são ignorados se o banco estiver indisponível. Playwright inicia API e Angular e percorre o atendimento sem interceptar a API.
 
-Execução local de 10/10/2026: **44 testes backend, 19 frontend e 5 de navegador aprovados**, build backend sem avisos e build Angular válido. O percurso inclui três sessões separadas, persistência após recarregar, revisão superada, conflito entre abas e verificações automatizadas de acessibilidade e layout móvel. CI e hospedagem ainda aguardam execução.
+Execução local de 10/10/2026: **65 testes backend, 36 frontend e 6 de navegador aprovados**, build backend sem avisos e build Angular válido. O percurso inclui três sessões separadas, persistência após recarregar, revisão superada, conflito entre abas e verificações automatizadas de acessibilidade e layout móvel. CI e hospedagem ainda aguardam execução.
 
 ## Documentação
 
@@ -70,4 +70,4 @@ Execução local de 10/10/2026: **44 testes backend, 19 frontend e 5 de navegado
 - [Concorrência](docs/decisions/concurrency.md)
 - [Evidência de execução](docs/evidence/progress.md)
 
-Publicação planejada na Vercel com Neon Free. O modo demo privado por visitante e o funcionamento hospedado serão verificados antes de anunciar a demonstração. Sem pagamentos reais, estoque, emissão fiscal, anexos ou envio de email/WhatsApp nesta versão.
+Publicação planejada na Vercel com Neon Free. A demo oferece cinco atendimentos fictícios por visitante, alternância entre atendente e dois técnicos, reinício e limite de vinte ordens. Os dados são isolados por visitante e expiram em 24 horas. O isolamento, a troca de perfil entre abas e o reset foram verificados no navegador usando o pacote compilado de Angular e .NET; o funcionamento hospedado será verificado antes de anunciar a demonstração. Sem pagamentos reais, estoque, emissão fiscal, anexos ou envio de email/WhatsApp nesta versão.

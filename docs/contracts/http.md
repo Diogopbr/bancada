@@ -35,3 +35,15 @@ ProblemDetails `{type,title,status,code,detail?,errors?}`. Stable codes validati
 ## Local tooling
 
 Repo root D:/Eu/Projetos/1; SDK D:/Eu/Projetos/.tools/dotnet/dotnet.exe. Dot source root scripts/local-env.ps1 to set SDK and local connection; do not print connection string. Private PostgreSQL port 55417 (existing service on 5432 preserved). Health `/health/ready` 200 iff PostgreSQL connects. Use local root settings only for local testing, never copy .local into worktrees or Git.
+# Demonstração privada
+
+Extensão da tarefa 8, disponível quando `BANCADA_DEMO_MODE=true`:
+
+- `GET /api/demo` -> `{enabled:boolean}`.
+- `POST /api/demo/start {}` -> sessão de atendente de um workspace privado. Reutiliza o visitante válido; cookie opaco HttpOnly.
+- `POST /api/demo/role {role:"receptionist"|"technician1"|"technician2"}` -> sessão, revogando as anteriores do workspace.
+- `POST /api/demo/reset {}` -> novo workspace e sessão de atendente; revoga dados/acessos anteriores.
+- DTO de sessão acrescenta `demoRole` opcional/nulo; `role` permanece `receptionist|technician`. Esse campo recupera o técnico correto depois de recarregar.
+- CSRF em todas as mutações, 20 requisições/minuto/IP para start/role/reset, até 20 ordens totais por workspace e expiração fixa em 24h.
+- Cinco exemplos fictícios fazem parte da quota: entrada, diagnóstico, orçamento pendente, revisão superada e entrega concluída.
+- O modo normal preserva a oficina única. Contas globais não entram na demo. O namespace interno não aparece nos DTOs de ordem.

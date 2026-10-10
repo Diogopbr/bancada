@@ -70,6 +70,7 @@ test('receptionist, technician and customer complete a repair in the browser', a
     await customer.getByRole('button', { name: 'Aprovar orçamento', exact: true }).click();
     await customer.getByRole('button', { name: 'Sim, aprovar serviço', exact: true }).click();
     await expect(customer.getByText(/orçamento aprovado com sucesso/i)).toBeVisible();
+    await expect(customer.getByText('Orçamento aprovado. Aguardando início do reparo.', { exact: true })).toBeVisible();
     expect((await new AxeBuilder({ page: customer }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([]);
     expect(await customer.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     if (process.env['BANCADA_CAPTURE_SCREENSHOTS']) {

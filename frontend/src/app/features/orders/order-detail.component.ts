@@ -341,6 +341,7 @@ export class OrderDetailComponent implements OnInit {
     try {
       await this.api.revokeCustomerAccess(o.id);
       this.customerAccess.set(null);
+      this.order.set(await this.api.getOrder(o.id));
     } catch (err: any) {
       this.handleActionError(err);
     }

@@ -78,7 +78,7 @@ public class DemoIsolationTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         var sessionA = await Start(a);
         var sessionB = await Start(b);
         Assert.NotEqual(sessionA.GetProperty("id").GetString(), sessionB.GetProperty("id").GetString());
-        Assert.Equal(new[] { "displayName", "id", "role" }, sessionA.EnumerateObject().Select(p => p.Name).Order().ToArray());
+        Assert.Equal(new[] { "demoRole", "displayName", "id", "role" }, sessionA.EnumerateObject().Select(p => p.Name).Order().ToArray());
         var ordersA = await Orders(a);
         var ordersB = await Orders(b);
         Assert.Equal(5, ordersA.GetProperty("total").GetInt32());
@@ -304,6 +304,10 @@ public class DemoIsolationTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.Equal(5, (await Orders(client)).GetProperty("total").GetInt32());
         using var normal = await fixture.Staff();
         Assert.Equal(3, (await Orders(normal)).GetProperty("total").GetInt32());
+        var drainDeadline = DateTime.UtcNow.AddSeconds(10);
+        while ((long)(await count.ExecuteScalarAsync())! != 0 && DateTime.UtcNow < drainDeadline)
+            await Task.Delay(100);
+        Assert.Equal(0L, await count.ExecuteScalarAsync());
         using var nextHost = Factory();
         using var next = Client(nextHost);
         Assert.Equal(HttpStatusCode.OK, (await next.GetAsync("/api/demo")).StatusCode);

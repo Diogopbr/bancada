@@ -129,7 +129,7 @@ describe('App', () => {
     // Confirm reset
     await comp.confirmReset();
     expect(mockSessionService.resetDemo).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/ordens']);
+    expect(router.navigate).toHaveBeenCalledWith(['/ordens'], { onSameUrlNavigation: 'reload' });
     expect(comp.showResetModal()).toBe(false);
   });
 });

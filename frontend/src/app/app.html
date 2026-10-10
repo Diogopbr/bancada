@@ -110,7 +110,7 @@
         <div class="demo-strip" data-testid="demo-strip" role="region" aria-label="Controles da demonstração">
           <div class="demo-strip-left">
             <span class="demo-badge">Modo Demonstração</span>
-            <span class="demo-caption">Dados fictícios descartáveis &bull; Sem métricas inventadas</span>
+            <span class="demo-caption">Até 20 ordens &bull; Dados fictícios válidos por 24h</span>
           </div>
           <div class="demo-strip-right">
             <label for="demo-role-select" class="demo-label">Perfil ativo:</label>
@@ -118,8 +118,8 @@
               id="demo-role-select"
               data-testid="demo-role-select"
               class="form-select demo-select"
-              [value]="sessionService.currentDemoRole()"
-              (change)="onRoleSelectChange($event)"
+              [ngModel]="sessionService.currentDemoRole()"
+              (ngModelChange)="onSwitchRole($event)"
               [disabled]="isSwitchingRole() || isResetting()"
             >
               @for (opt of demoRoleOptions; track opt.value) {

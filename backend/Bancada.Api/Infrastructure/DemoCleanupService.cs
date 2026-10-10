@@ -40,14 +40,17 @@ public sealed class DemoCleanupService(IServiceScopeFactory scopes, IConfigurati
                 .ExecuteDeleteAsync(cancellationToken);
             await db.DemoWorkspaces.Where(w => ids.Contains(w.Id)).ExecuteDeleteAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
-            nextCleanup = DateTimeOffset.UtcNow.AddMinutes(5);
+            // Keep transactions bounded, but drain a backlog without a five-minute pause per batch.
+            nextCleanup = ids.Length == 10
+                ? DateTimeOffset.UtcNow.AddSeconds(1)
+                : DateTimeOffset.UtcNow.AddMinutes(5);
         }
         finally { gate.Release(); }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
             try { await CleanupIfDueAsync(stoppingToken); }

@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs';
 import { SessionService } from './core/session.service';
@@ -10,7 +11,7 @@ import { FocusTrapDirective } from './core/focus-trap.directive';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule, FocusTrapDirective],
+  imports: [CommonModule, FormsModule, RouterModule, FocusTrapDirective],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
@@ -78,10 +79,8 @@ export class App implements OnInit {
 
     try {
       await this.sessionService.switchDemoRole(role);
-      // Reload route without window reload
-      const url = this.router.url;
-      await this.router.navigateByUrl('/', { skipLocationChange: true });
-      await this.router.navigateByUrl(url);
+      this.sessionService.refreshRoutes = true;
+      await this.router.navigateByUrl(this.router.url, { onSameUrlNavigation: 'reload' });
     } catch (err: any) {
       if (err.status === 401) {
         this.demoErrorMessage.set('Sessão de demonstração expirada (24h). Redirecionando...');
@@ -93,6 +92,7 @@ export class App implements OnInit {
         this.demoErrorMessage.set(problem?.detail || 'Erro ao alternar papel na demonstração.');
       }
     } finally {
+      this.sessionService.refreshRoutes = false;
       this.isSwitchingRole.set(false);
     }
   }
@@ -113,8 +113,8 @@ export class App implements OnInit {
     try {
       await this.sessionService.resetDemo();
       this.showResetModal.set(false);
-      // Navigate to queue after new session
-      await this.router.navigate(['/ordens']);
+      this.sessionService.refreshRoutes = true;
+      await this.router.navigate(['/ordens'], { onSameUrlNavigation: 'reload' });
     } catch (err: any) {
       if (err.status === 401) {
         this.demoErrorMessage.set('Sessão expirada. Inicie uma nova demonstração.');
@@ -126,6 +126,7 @@ export class App implements OnInit {
         this.demoErrorMessage.set(problem?.detail || 'Falha ao reiniciar demonstração.');
       }
     } finally {
+      this.sessionService.refreshRoutes = false;
       this.isResetting.set(false);
     }
   }
