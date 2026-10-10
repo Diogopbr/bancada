@@ -93,12 +93,14 @@ public sealed class DemoResetService(BancadaDb db, UserManager<StaffUser> users,
             Check(await users.AddToRoleAsync(user, role == "receptionist" ? "receptionist" : "technician"));
             people.Add(user);
         }
-        for (var index = 1; index <= 3; index++)
+        var equipment = new[] { "Notebook — entrada", "Celular — diagnóstico", "Monitor — aguardando aprovação",
+            "Console — revisão de orçamento", "Impressora — entregue" };
+        for (var index = 1; index <= equipment.Length; index++)
         {
             var order = new Order
             {
                 WorkspaceId = workspaceId, CustomerName = $"Cliente Ficticio {index}",
-                CustomerEmail = $"cliente{index}@bancada.example", EquipmentLabel = $"Notebook Demo {index}",
+                CustomerEmail = $"cliente{index}@bancada.example", EquipmentLabel = equipment[index - 1],
                 EquipmentSerial = $"FICTICIO-{index}", ReportedIssue = "Equipamento ficticio nao liga.",
                 TechnicianId = people[1].Id, TechnicianName = people[1].DisplayName
             };
@@ -109,7 +111,7 @@ public sealed class DemoResetService(BancadaDb db, UserManager<StaffUser> users,
             });
             if (index >= 2) order.UpdateDiagnosis(people[1].Id, "technician", order.Version,
                 "Fonte ficticia defeituosa.", people[1].DisplayName);
-            if (index == 3)
+            if (index >= 3)
             {
                 var quote = new Quote
                 {
@@ -120,6 +122,30 @@ public sealed class DemoResetService(BancadaDb db, UserManager<StaffUser> users,
                 order.Quotes.Add(quote);
                 order.Status = "awaitingApproval";
                 order.Changed("quotePublished", people[1].DisplayName, "Orcamento revisao 1 publicado.", quote.PublishedAt);
+                if (index >= 4)
+                {
+                    quote.Decision = "accepted";
+                    order.Status = "approved";
+                    order.Changed("quoteAccepted", order.CustomerName, "Orcamento revisao 1 aceito.", BusinessTime.UtcNow);
+                }
+                if (index == 4)
+                {
+                    var revised = new Quote
+                    {
+                        OrderId = order.Id, Revision = 2, PublishedAt = BusinessTime.UtcNow,
+                        Items = [new QuoteItem { Description = "Fonte e ajuste fictícios", Kind = "part", Quantity = 1, UnitPrice = 109.90m }]
+                    };
+                    revised.Total = Quote.CalculateTotal(revised.Items);
+                    order.Quotes.Add(revised);
+                    order.Status = "awaitingApproval";
+                    order.Changed("quotePublished", people[1].DisplayName, "Orcamento revisao 2 publicado. Nova aprovação necessária.", revised.PublishedAt);
+                }
+                if (index == 5)
+                {
+                    order.ApplyTransition(people[1].Id, "technician", "repairing", order.Version, null, people[1].DisplayName, BusinessTime.UtcNow);
+                    order.ApplyTransition(people[1].Id, "technician", "ready", order.Version, null, people[1].DisplayName, BusinessTime.UtcNow);
+                    order.ApplyTransition(people[0].Id, "receptionist", "delivered", order.Version, null, people[0].DisplayName, BusinessTime.UtcNow);
+                }
             }
             db.Orders.Add(order);
         }

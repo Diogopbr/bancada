@@ -9,6 +9,27 @@ namespace Bancada.Tests;
 public class DemoIsolationTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 {
     private ApiFactory Factory() => new(fixture.Connection, demo: true);
+    [Fact]
+    public async Task Demo_examples_include_superseded_revision_and_completed_delivery()
+    {
+        using var factory = Factory();
+        using var client = Client(factory);
+        await Start(client);
+        var list = await Orders(client);
+        Assert.Equal(5, list.GetProperty("total").GetInt32());
+        var items = list.GetProperty("items").EnumerateArray().ToArray();
+        Assert.Equal(5, items.Select(i => i.GetProperty("equipmentLabel").GetString()).Distinct().Count());
+        var revised = items.Single(i => i.GetProperty("equipmentLabel").GetString() == "Console — revisão de orçamento");
+        var detail = await client.GetFromJsonAsync<JsonElement>($"/api/orders/{revised.GetProperty("id").GetGuid()}");
+        Assert.Equal("awaitingApproval", detail.GetProperty("status").GetString());
+        Assert.Equal(2, detail.GetProperty("currentQuote").GetProperty("revision").GetInt32());
+        Assert.Equal(JsonValueKind.Null, detail.GetProperty("currentQuote").GetProperty("decision").ValueKind);
+        Assert.Contains(detail.GetProperty("history").EnumerateArray(), e => e.GetProperty("action").GetString() == "quoteAccepted");
+        var delivered = items.Single(i => i.GetProperty("status").GetString() == "delivered");
+        var finished = await client.GetFromJsonAsync<JsonElement>($"/api/orders/{delivered.GetProperty("id").GetGuid()}");
+        Assert.Equal("accepted", finished.GetProperty("currentQuote").GetProperty("decision").GetString());
+        Assert.Equal("delivered", finished.GetProperty("history").EnumerateArray().Last().GetProperty("action").GetString());
+    }
     private static HttpClient Client(ApiFactory factory) => factory.CreateClient(
         new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost"), AllowAutoRedirect = false });
 
@@ -60,8 +81,8 @@ public class DemoIsolationTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.Equal(new[] { "displayName", "id", "role" }, sessionA.EnumerateObject().Select(p => p.Name).Order().ToArray());
         var ordersA = await Orders(a);
         var ordersB = await Orders(b);
-        Assert.Equal(3, ordersA.GetProperty("total").GetInt32());
-        Assert.Equal(3, ordersB.GetProperty("total").GetInt32());
+        Assert.Equal(5, ordersA.GetProperty("total").GetInt32());
+        Assert.Equal(5, ordersB.GetProperty("total").GetInt32());
         var foreign = ordersB.GetProperty("items")[0];
         var id = foreign.GetProperty("id").GetGuid();
         Assert.Equal(HttpStatusCode.NotFound, (await a.GetAsync($"/api/orders/{id}")).StatusCode);
@@ -131,15 +152,15 @@ public class DemoIsolationTests(ApiFixture fixture) : IClassFixture<ApiFixture>
     }
 
     [Fact]
-    public async Task Twenty_order_quota_is_atomic_including_three_seed_orders()
+    public async Task Twenty_order_quota_is_atomic_including_five_seed_orders()
     {
         using var factory = Factory();
         using var client = Client(factory);
         await Start(client);
         var technician = (await client.GetFromJsonAsync<JsonElement>("/api/technicians"))[0].GetProperty("id").GetString()!;
         var responses = await Task.WhenAll(Enumerable.Range(0, 24).Select(_ => client.PostAsJsonAsync("/api/orders", NewOrder(technician))));
-        Assert.Equal(17, responses.Count(r => r.StatusCode == HttpStatusCode.Created));
-        Assert.Equal(7, responses.Count(r => r.StatusCode == HttpStatusCode.Conflict));
+        Assert.Equal(15, responses.Count(r => r.StatusCode == HttpStatusCode.Created));
+        Assert.Equal(9, responses.Count(r => r.StatusCode == HttpStatusCode.Conflict));
         Assert.Equal(20, (await Orders(client)).GetProperty("total").GetInt32());
         Assert.Equal(20, (await Orders(client)).GetProperty("total").GetInt32());
     }
@@ -243,7 +264,7 @@ public class DemoIsolationTests(ApiFixture fixture) : IClassFixture<ApiFixture>
                 (SELECT "WorkspaceId" FROM "AspNetUsers" WHERE "Id" = @user)
             """, connection);
         count.Parameters.AddWithValue("user", userId);
-        Assert.Equal(3L, await count.ExecuteScalarAsync());
+        Assert.Equal(5L, await count.ExecuteScalarAsync());
     }
 
     [Fact]
@@ -279,8 +300,8 @@ public class DemoIsolationTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             WHERE o."WorkspaceId" = ANY(@ids)
             """, connection);
         children.Parameters.AddWithValue("ids", expiredIds.ToArray());
-        Assert.Equal(6L, await children.ExecuteScalarAsync());
-        Assert.Equal(3, (await Orders(client)).GetProperty("total").GetInt32());
+        Assert.Equal(10L, await children.ExecuteScalarAsync());
+        Assert.Equal(5, (await Orders(client)).GetProperty("total").GetInt32());
         using var normal = await fixture.Staff();
         Assert.Equal(3, (await Orders(normal)).GetProperty("total").GetInt32());
         using var nextHost = Factory();
@@ -336,7 +357,7 @@ public class DemoIsolationTests(ApiFixture fixture) : IClassFixture<ApiFixture>
                 foreach (var client in clients) await ApiFixture.Csrf(client);
                 var sessions = await Task.WhenAll(responses.Select(async response => await response.Content.ReadFromJsonAsync<JsonElement>()));
                 Assert.Equal(8, sessions.Select(s => s.GetProperty("id").GetString()).Distinct().Count());
-                foreach (var client in clients) Assert.Equal(3, (await Orders(client)).GetProperty("total").GetInt32());
+                foreach (var client in clients) Assert.Equal(5, (await Orders(client)).GetProperty("total").GetInt32());
             }
             finally { foreach (var client in clients) client.Dispose(); }
         }
