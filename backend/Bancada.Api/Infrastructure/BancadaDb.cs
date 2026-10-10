@@ -24,6 +24,7 @@ public sealed class BancadaDb(DbContextOptions<BancadaDb> options, IHttpContextA
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.HasSequence<long>("OrderNumbers").StartsAt(10001);
         builder.Entity<DemoWorkspace>().HasIndex(w => w.ExpiresAt);
         builder.Entity<DemoVisitor>(visitor =>
         {
@@ -38,6 +39,9 @@ public sealed class BancadaDb(DbContextOptions<BancadaDb> options, IHttpContextA
             order.HasQueryFilter(o => o.WorkspaceId == CurrentWorkspaceId
                 && (o.WorkspaceId == null || DemoWorkspaces.Any(w => w.Id == o.WorkspaceId && !w.Revoked && w.ExpiresAt > DateTimeOffset.UtcNow)));
             order.Property(o => o.Version).IsConcurrencyToken();
+            order.Property(o => o.Code)
+                .HasDefaultValueSql("'BC-' || nextval('\"OrderNumbers\"')::text")
+                .HasSentinel("");
             order.HasIndex(o => o.Code).IsUnique();
             order.HasOne<StaffUser>().WithMany().HasForeignKey(o => o.TechnicianId).OnDelete(DeleteBehavior.Restrict);
             order.HasMany(o => o.History).WithOne().HasForeignKey(e => e.OrderId);

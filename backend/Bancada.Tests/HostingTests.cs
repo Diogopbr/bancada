@@ -5,11 +5,34 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Npgsql;
 using System.Diagnostics;
 using System.Net.Sockets;
+using Microsoft.Extensions.Configuration;
 
 namespace Bancada.Tests;
 
 public class HostingTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 {
+    [Fact]
+    public async Task Explicit_Vercel_ingress_preserves_external_https_and_secure_csrf_cookie()
+    {
+        using var factory = new ApiFactory(fixture.Connection, "Production", vercelIngress: true, platform: "1");
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        { BaseAddress = new Uri("http://localhost"), AllowAutoRedirect = false });
+        client.DefaultRequestHeaders.Add("X-Forwarded-Proto", "https");
+        client.DefaultRequestHeaders.Add("X-Vercel-Forwarded-For", "203.0.113.8");
+        var response = await client.GetAsync("/api/csrf");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("secure", response.Headers.GetValues("Set-Cookie").Single().ToLowerInvariant());
+    }
+
+    [Fact]
+    public void Vercel_ingress_cannot_be_enabled_without_platform_configuration()
+    {
+        var configuration = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["Hosting:VercelIngress"] = "true" }).Build();
+        Assert.Throws<InvalidOperationException>(() => Bancada.Api.Infrastructure.ProductionHosting.ConfigureForwarding(
+            new Microsoft.AspNetCore.Builder.ForwardedHeadersOptions(), configuration));
+    }
+
     [Fact]
     public async Task Database_keys_preserve_staff_and_customer_cookies_across_restart_and_revocation()
     {

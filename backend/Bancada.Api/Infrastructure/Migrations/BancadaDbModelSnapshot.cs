@@ -22,6 +22,9 @@ namespace Bancada.Api.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.HasSequence("OrderNumbers")
+                .StartsAt(10001L);
+
             modelBuilder.Entity("Bancada.Api.Features.Access.CustomerAccess", b =>
                 {
                     b.Property<Guid>("Id")
@@ -225,7 +228,9 @@ namespace Bancada.Api.Infrastructure.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValueSql("'BC-' || nextval('\"OrderNumbers\"')::text");
 
                     b.Property<string>("CustomerEmail")
                         .IsRequired()

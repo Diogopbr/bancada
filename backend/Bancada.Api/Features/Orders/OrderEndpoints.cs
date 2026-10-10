@@ -36,7 +36,6 @@ public static class OrderEndpoints
                 EquipmentLabel = request.EquipmentLabel.Trim(), EquipmentSerial = request.EquipmentSerial?.Trim() ?? "",
                 ReportedIssue = request.ReportedIssue.Trim(), TechnicianId = technician.Id, TechnicianName = technician.DisplayName
             };
-            order.Code = $"BC-{order.Id:N}".ToUpperInvariant();
             order.History.Add(new OrderEvent
             {
                 OrderId = order.Id, Action = "received", ActorName = actor.DisplayName,

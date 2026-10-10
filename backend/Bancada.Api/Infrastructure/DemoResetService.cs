@@ -102,7 +102,6 @@ public sealed class DemoResetService(BancadaDb db, UserManager<StaffUser> users,
                 EquipmentSerial = $"FICTICIO-{index}", ReportedIssue = "Equipamento ficticio nao liga.",
                 TechnicianId = people[1].Id, TechnicianName = people[1].DisplayName
             };
-            order.Code = $"BC-{order.Id:N}".ToUpperInvariant();
             order.History.Add(new OrderEvent
             {
                 OrderId = order.Id, Action = "received", ActorName = people[0].DisplayName,

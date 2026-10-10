@@ -5,7 +5,7 @@ RUN npm ci
 COPY frontend/ ./
 RUN npm run build
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend
+FROM mcr.microsoft.com/dotnet/sdk:10.0.401 AS backend
 WORKDIR /src
 COPY global.json ./
 COPY backend/Bancada.Api/Bancada.Api.csproj backend/Bancada.Api/
@@ -13,7 +13,7 @@ RUN dotnet restore backend/Bancada.Api
 COPY backend/Bancada.Api/ backend/Bancada.Api/
 RUN dotnet publish backend/Bancada.Api -c Release -o /publish --no-restore
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.12
 WORKDIR /app
 COPY --from=backend /publish ./
 COPY --from=frontend /src/frontend/dist/bancada-web/browser/ ./wwwroot/

@@ -12,6 +12,15 @@ public static class ProductionHosting
         options.RequireHeaderSymmetry = true;
         options.KnownIPNetworks.Clear();
         options.KnownProxies.Clear();
+        if (configuration.GetValue<bool>("Hosting:VercelIngress"))
+        {
+            if (configuration["VERCEL"] != "1")
+                throw new InvalidOperationException("Vercel ingress requires the Vercel deployment environment.");
+            // Only enable inside the gateway-only Vercel container runtime. Vercel overwrites this IP header.
+            // A self-hosted public Kestrel server must use explicit trusted proxies below instead.
+            options.ForwardedForHeaderName = "x-vercel-forwarded-for";
+            return;
+        }
         // Trust only the immediate proxy controlled by the host, never arbitrary public forwarding headers.
         foreach (var value in configuration.GetSection("Hosting:TrustedProxies").Get<string[]>() ?? [])
             options.KnownProxies.Add(IPAddress.Parse(value));

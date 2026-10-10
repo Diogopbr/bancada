@@ -78,7 +78,8 @@ public sealed class ApiFixture : IAsyncLifetime
 }
 
 internal sealed class ApiFactory(string connection, string environment = "Development", TestLogs? logs = null,
-    bool demo = false, string? webRoot = null, string? trustedProxy = null) : WebApplicationFactory<Program>
+    bool demo = false, string? webRoot = null, string? trustedProxy = null,
+    bool vercelIngress = false, string? platform = null) : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -92,7 +93,9 @@ internal sealed class ApiFactory(string connection, string environment = "Develo
             {
                 ["ConnectionStrings:Bancada"] = connection,
                 ["BANCADA_DEMO_PASSWORD"] = ApiFixture.Password,
-                ["BANCADA_DEMO_MODE"] = demo.ToString()
+                ["BANCADA_DEMO_MODE"] = demo.ToString(),
+                ["Hosting:VercelIngress"] = vercelIngress.ToString(),
+                ["VERCEL"] = platform
             };
             if (trustedProxy is not null) settings["Hosting:TrustedProxies:0"] = trustedProxy;
             configuration.AddInMemoryCollection(settings);
