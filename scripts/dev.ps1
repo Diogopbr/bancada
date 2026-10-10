@@ -27,4 +27,16 @@ $env:ASPNETCORE_ENVIRONMENT = 'Development'
 $api = Start-Process -FilePath (Get-Command dotnet).Source -ArgumentList @('run','--no-launch-profile','--project','backend/Bancada.Api') -WorkingDirectory $repoPath -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $repoPath '.local/api.log') -RedirectStandardError (Join-Path $repoPath '.local/api-error.log')
 $frontend = Start-Process -FilePath 'cmd.exe' -ArgumentList @('/c','npm run start -- --port 4200 --proxy-config proxy.conf.json') -WorkingDirectory (Join-Path $repoPath 'frontend') -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $repoPath '.local/frontend.log') -RedirectStandardError (Join-Path $repoPath '.local/frontend-error.log')
 @{ api = $api.Id; frontend = $frontend.Id } | ConvertTo-Json | Set-Content -LiteralPath $statePath
+$deadline = (Get-Date).AddSeconds(90)
+foreach ($endpoint in @('http://localhost:5080/health/ready', 'http://localhost:4200')) {
+    $ready = $false
+    while ((Get-Date) -lt $deadline) {
+        try {
+            $response = Invoke-WebRequest -Uri $endpoint -UseBasicParsing -TimeoutSec 2
+            if ($response.StatusCode -eq 200) { $ready = $true; break }
+        } catch { }
+        Start-Sleep -Milliseconds 500
+    }
+    if (-not $ready) { throw "Development endpoint did not become ready: $endpoint. Check .local logs." }
+}
 Write-Output 'API: http://localhost:5080/health/ready; interface: http://localhost:4200'
